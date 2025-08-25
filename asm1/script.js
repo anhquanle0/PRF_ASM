@@ -1,5 +1,25 @@
 "use strict";
 
+const containerPetsInfo = document.querySelector("#tbody");
+const form = document.querySelector("form");
+
+const btnSubmit = document.querySelector("#submit-btn");
+
+const inputId = document.querySelector("#input-id");
+const inputName = document.querySelector("#input-name");
+const inputAge = document.querySelector("#input-age");
+const inputType = document.querySelector("#input-type");
+const inputWeight = document.querySelector("#input-weight");
+const inputLength = document.querySelector("#input-length");
+const inputBreed = document.querySelector("#input-breed");
+const inputColor = document.querySelector("#input-color-1");
+const inputVaccinated = document.querySelector("#input-vaccinated");
+const inputDewormed = document.querySelector("#input-dewormed");
+const inputSterilized = document.querySelector("#input-sterilized");
+
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
 class PetData {
   constructor(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded) {
     this.id = id;
@@ -22,26 +42,13 @@ const pet2 = new PetData("P002", "Tyke", 5, "Dog", 3, 40, "Mixed Breed", "green"
 const petInfoArray = new Map();
 petInfoArray.set(pet1.id, pet1);
 petInfoArray.set(pet2.id, pet2);
+petInfoArray.forEach((pet) => displayPetInfo(pet));
 
-const containerPetsInfo = document.querySelector("#tbody");
-const form = document.querySelector("form");
-
-const btnSubmit = document.querySelector("#submit-btn");
-
-const inputId = document.querySelector("#input-id");
-const inputName = document.querySelector("#input-name");
-const inputAge = document.querySelector("#input-age");
-const inputType = document.querySelector("#input-type");
-const inputWeight = document.querySelector("#input-weight");
-const inputLength = document.querySelector("#input-length");
-const inputBreed = document.querySelector("#input-breed");
-const inputColor = document.querySelector("#input-color-1");
-const inputVaccinated = document.querySelector("#input-vaccinated");
-const inputDewormed = document.querySelector("#input-dewormed");
-const inputSterilized = document.querySelector("#input-sterilized");
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
 
 // 1. Submit form
-let count = 0;
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -53,9 +60,9 @@ btnSubmit.addEventListener("click", (e) => {
   const lenght = inputLength.value;
   const breed = inputBreed.value;
   const color = inputColor.value;
-  const vaccinated = inputVaccinated.check;
-  const dewormed = inputDewormed.check;
-  const sterilized = inputSterilized.check;
+  const vaccinated = inputVaccinated.checked;
+  const dewormed = inputDewormed.checked;
+  const sterilized = inputSterilized.checked;
 
   const newPet = new PetData(
     id,
@@ -71,7 +78,14 @@ btnSubmit.addEventListener("click", (e) => {
     sterilized,
     new Date().toLocaleDateString("en-GB")
   );
-  if (validate(newPet)) console.log(newPet);
+
+  if (validate(newPet)) {
+    // display new pet
+    displayPetInfo(newPet);
+
+    // clear input fields
+    clearInput();
+  }
 });
 
 // 2. Validate data
@@ -83,7 +97,11 @@ function validate(pet) {
   if (!pet instanceof PetData) return false;
 
   // b. Unique ID
-  if (Array.from(petInfoArray.keys()).includes(pet.id)) {
+  if (pet.id == "") {
+    alert("Vui lòng nhập ID");
+    inputId.focus();
+    return false;
+  } else if (Array.from(petInfoArray.keys()).includes(pet.id)) {
     alert("ID đã tồn tại");
     inputId.focus();
     return false;
@@ -97,7 +115,7 @@ function validate(pet) {
   }
 
   // d. Age
-  if (!numberPattern.test(pet.age) || pet.age <= 0 || pet.age > 20) {
+  if (!numberPattern.test(pet.age) || pet.age <= 0 || pet.age > 50) {
     alert("Tuổi không phù hợp");
     inputAge.focus();
     return false;
@@ -130,4 +148,41 @@ function validate(pet) {
   }
 
   return petInfoArray.set(pet.id, pet);
+}
+
+// 3. Display info list
+function displayPetInfo(pet) {
+  const id = pet.id.toUpperCase();
+  const name = pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "";
+
+  containerPetsInfo.innerHTML += `
+						<tr>
+							<th scope="row">${id}</th>
+							<td>${name}</td>
+							<td>${pet.age}</td>
+							<td>${pet.type}</td>
+							<td>${pet.weight} kg</td>
+							<td>${pet.lenght} cm</td>
+							<td>${pet.breed}</td>
+							<td>
+								<i class="bi bi-square-fill" style="color: ${pet.color}"></i>
+							</td>
+							<td><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
+							<td><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
+							<td><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>
+							<td>${pet.dateAdded}</td>
+							<td><button type="button" class="btn btn-danger">Delete</button>
+							</td>
+						</tr>  
+  `;
+}
+
+// 4. Clear input form
+function clearInput() {
+  // form.reset();
+
+  inputId.value = inputName.value = inputAge.value = inputWeight.value = inputLength.value = "";
+  inputType.value = "Select Type";
+  inputBreed.value = "Select Breed";
+  inputVaccinated.checked = inputDewormed.checked = inputSterilized.checked = false;
 }
