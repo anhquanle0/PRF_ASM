@@ -98,52 +98,52 @@ function validate(pet) {
 
   // b. Unique ID
   if (pet.id == "") {
-    alert("Vui lòng nhập ID");
+    showAlert("Vui lòng nhập ID");
     inputId.focus();
     return false;
   } else if (Array.from(petInfoArray.keys()).includes(pet.id)) {
-    alert("ID đã tồn tại");
+    showAlert("ID đã tồn tại");
     inputId.focus();
     return false;
   }
 
   // c. Name
   if (!namePattern.test(pet.name)) {
-    alert("Tên không được tồn tại chữ số");
+    showAlert("Tên không được tồn tại chữ số");
     inputName.focus();
     return false;
   }
 
   // d. Age
   if (!numberPattern.test(pet.age) || pet.age <= 0 || pet.age > 50) {
-    alert("Tuổi không phù hợp");
+    showAlert("Tuổi không phù hợp");
     inputAge.focus();
     return false;
   }
 
   // e. Type
   if (pet.type == "Select Type") {
-    alert("Hãy chọn loại pet");
+    showAlert("Hãy chọn loại pet");
     return false;
   }
 
   // f. Weight
   if (!numberPattern.test(pet.weight) || pet.weight <= 5 || pet.weight > 100) {
-    alert("Hãy điền số cân nặng phù hợp");
+    showAlert("Hãy điền số cân nặng phù hợp");
     inputWeight.focus();
     return false;
   }
 
   // g. Length
   if (!numberPattern.test(pet.length) || pet.length <= 10 || pet.length > 200) {
-    alert("Hãy điền chiều dài phù hợp");
+    showAlert("Hãy điền chiều dài phù hợp");
     inputLength.focus();
     return false;
   }
 
   // h. Breed
   if (pet.breed == "Select Breed") {
-    alert("Hãy chọn thức ăn cho pet");
+    showAlert("Hãy chọn thức ăn cho pet");
     return false;
   }
 
@@ -185,4 +185,52 @@ function clearInput() {
   inputType.value = "Select Type";
   inputBreed.value = "Select Breed";
   inputVaccinated.checked = inputDewormed.checked = inputSterilized.checked = false;
+}
+
+// 5. Alert announcement
+function showAlert(message) {
+  if (!document.getElementById("toast-style")) {
+    const css = `
+        .toast {
+          position: fixed; 
+          top: 0; 
+          right: 20px; 
+          margin-top: 20px; 
+          z-index: 9999;
+          background:#fff; 
+          color:#ff1a1a; 
+          font-size: 16px;
+          padding:10px 16px; 
+          border-radius:6px;
+          font-family:sans-serif; 
+          box-shadow:0 2px 8px rgba(0,0,0,.2);
+          display:inline-block; 
+          width:fit-content; 
+          width:-moz-fit-content; 
+          width:max-content;
+          max-width:80vw; 
+          white-space:normal; 
+          overflow-wrap:anywhere; 
+          word-break:break-word;
+          opacity:0; 
+          transform:translateY(-100%); 
+          transition:transform .35s ease, opacity .35s ease;
+        }
+        .toast.show { opacity:1; transform:translateY(0); }
+        .toast.hide { opacity:0; transform:translateY(-60%); }
+      `;
+    const s = document.createElement("style");
+    s.id = "toast-style";
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = message;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => {
+    el.classList.add("hide");
+    el.addEventListener("transitionend", () => el.remove(), { once: true });
+  }, 3000);
 }
