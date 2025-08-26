@@ -21,7 +21,20 @@ const inputSterilized = document.querySelector("#input-sterilized");
 ////////////////////////////////////
 ////////////////////////////////////
 class PetData {
-  constructor(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded) {
+  constructor(
+    id,
+    name,
+    age,
+    type,
+    weight,
+    length,
+    breed,
+    color,
+    vaccinated,
+    dewormed,
+    sterilized,
+    dateAdded
+  ) {
     this.id = id;
     this.name = name;
     this.age = age;
@@ -37,8 +50,34 @@ class PetData {
   }
 }
 
-const pet1 = new PetData("P001", "Tom", 3, "Cat", 5, 50, "Tabby", "red", true, true, true, "2022-03-01");
-const pet2 = new PetData("P002", "Tyke", 5, "Dog", 3, 40, "Mixed Breed", "green", false, false, false, "2022-03-02");
+const pet1 = new PetData(
+  "P001",
+  "Tom",
+  3,
+  "Cat",
+  5,
+  50,
+  "Tabby",
+  "red",
+  true,
+  true,
+  true,
+  "2022-03-01"
+);
+const pet2 = new PetData(
+  "P002",
+  "Tyke",
+  5,
+  "Dog",
+  3,
+  40,
+  "Mixed Breed",
+  "green",
+  false,
+  false,
+  false,
+  "2022-03-02"
+);
 const petInfoArray = new Map();
 petInfoArray.set(pet1.id, pet1);
 petInfoArray.set(pet2.id, pet2);
@@ -181,10 +220,18 @@ function displayPetInfo(pet) {
 function clearInput() {
   // form.reset();
 
-  inputId.value = inputName.value = inputAge.value = inputWeight.value = inputLength.value = "";
+  inputId.value =
+    inputName.value =
+    inputAge.value =
+    inputWeight.value =
+    inputLength.value =
+      "";
   inputType.value = "Select Type";
   inputBreed.value = "Select Breed";
-  inputVaccinated.checked = inputDewormed.checked = inputSterilized.checked = false;
+  inputVaccinated.checked =
+    inputDewormed.checked =
+    inputSterilized.checked =
+      false;
 }
 
 // 5. Alert announcement
@@ -234,3 +281,15 @@ function showAlert(message) {
     el.addEventListener("transitionend", () => el.remove(), { once: true });
   }, 3000);
 }
+
+// 6. Delete row
+document.querySelectorAll(".btn-danger").forEach((btn) =>
+  btn.addEventListener("click", (e) => {
+    if (confirm("Are you sure?")) {
+      const row = e.target.closest("tr");
+      const id = row.querySelector("th").textContent;
+      petInfoArray.delete(id);
+      row.remove();
+    }
+  })
+);
