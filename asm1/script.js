@@ -1,9 +1,11 @@
 "use strict";
 
-const containerPetsInfo = document.querySelector("#tbody");
 const form = document.querySelector("form");
+const containerPetsInfo = document.querySelector("#tbody");
 
 const btnSubmit = document.querySelector("#submit-btn");
+const btnHealthy = document.querySelector("#healthy-btn");
+const btnBMI = document.querySelector("#bmi-btn");
 
 const inputId = document.querySelector("#input-id");
 const inputName = document.querySelector("#input-name");
@@ -21,20 +23,19 @@ const inputSterilized = document.querySelector("#input-sterilized");
 ////////////////////////////////////
 ////////////////////////////////////
 class PetData {
-  constructor(
-    id,
-    name,
-    age,
-    type,
-    weight,
-    length,
-    breed,
-    color,
-    vaccinated,
-    dewormed,
-    sterilized,
-    dateAdded
-  ) {
+  bmi = 0;
+
+  constructor(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded) {
+    if (arguments.length === 11) {
+      this._create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
+      this.dateAdded = new Date().toLocaleDateString("en-GB");
+    } else if (arguments.length === 12) {
+      this._create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
+      this.dateAdded = dateAdded;
+    }
+  }
+
+  _create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized) {
     this.id = id;
     this.name = name;
     this.age = age;
@@ -46,41 +47,23 @@ class PetData {
     this.vaccinated = vaccinated;
     this.dewormed = dewormed;
     this.sterilized = sterilized;
-    this.dateAdded = dateAdded;
+    this.bmi = this._getBMI();
+  }
+
+  _getBMI() {
+    return (this.weight * 886) / this.length / this.length;
   }
 }
 
-const pet1 = new PetData(
-  "P001",
-  "Tom",
-  3,
-  "Cat",
-  5,
-  50,
-  "Tabby",
-  "red",
-  true,
-  true,
-  true,
-  "2022-03-01"
-);
-const pet2 = new PetData(
-  "P002",
-  "Tyke",
-  5,
-  "Dog",
-  3,
-  40,
-  "Mixed Breed",
-  "green",
-  false,
-  false,
-  false,
-  "2022-03-02"
-);
+const pet1 = new PetData("P001", "Tom", 3, "Cat", 5, 50, "Tabby", "red", true, true, true, "2022/03/01");
+const pet2 = new PetData("P002", "Tyke", 5, "Dog", 3, 40, "Mixed Breed", "green", false, false, false, "2022/03/02");
+
+// use map to distinct the PetID
 const petInfoArray = new Map();
 petInfoArray.set(pet1.id, pet1);
 petInfoArray.set(pet2.id, pet2);
+
+// print out the initial data
 petInfoArray.forEach((pet) => displayPetInfo(pet));
 
 ////////////////////////////////////
@@ -91,6 +74,7 @@ petInfoArray.forEach((pet) => displayPetInfo(pet));
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
+  // retrieve data
   const id = inputId.value;
   const name = inputName.value;
   const age = inputAge.value;
@@ -104,7 +88,7 @@ btnSubmit.addEventListener("click", (e) => {
   const sterilized = inputSterilized.checked;
 
   const newPet = new PetData(
-    id,
+    id.toUpperCase(),
     name,
     age,
     type,
@@ -114,10 +98,10 @@ btnSubmit.addEventListener("click", (e) => {
     color,
     vaccinated,
     dewormed,
-    sterilized,
-    new Date().toLocaleDateString("en-GB")
+    sterilized
   );
 
+  // validate data
   if (validate(newPet)) {
     // display new pet
     displayPetInfo(newPet);
@@ -127,12 +111,12 @@ btnSubmit.addEventListener("click", (e) => {
   }
 });
 
-// 2. Validate data
+// 2. Validate data function
 function validate(pet) {
   const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
   const numberPattern = /^\d+$/;
 
-  // a. Type-sage
+  // a. Type-safe
   if (!pet instanceof PetData) return false;
 
   // b. Unique ID
@@ -191,47 +175,44 @@ function validate(pet) {
 
 // 3. Display info list
 function displayPetInfo(pet) {
-  const id = pet.id.toUpperCase();
   const name = pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "";
 
-  containerPetsInfo.innerHTML += `
-						<tr>
-							<th scope="row">${id}</th>
-							<td>${name}</td>
-							<td>${pet.age}</td>
-							<td>${pet.type}</td>
-							<td>${pet.weight} kg</td>
-							<td>${pet.lenght} cm</td>
-							<td>${pet.breed}</td>
-							<td>
-								<i class="bi bi-square-fill" style="color: ${pet.color}"></i>
-							</td>
-							<td><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
-							<td><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
-							<td><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>
-							<td>${pet.dateAdded}</td>
-							<td><button type="button" class="btn btn-danger">Delete</button>
-							</td>
-						</tr>  
+  const html = `
+		<tr>
+			<th scope="row">${pet.id}</th>
+			<td>${name}</td>
+			<td>${pet.age}</td>
+			<td>${pet.type}</td>
+			<td>${pet.weight} kg</td>
+			<td>${pet.lenght} cm</td>
+			<td>${pet.breed}</td>
+			<td>
+			  <i class="bi bi-square-fill" style="color: ${pet.color}"></i>
+			</td>
+			<td><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>
+			<td><span class="bmi">?</span></td>
+			<td>${pet.dateAdded}</td>
+			<td>
+        <button type="button" class="btn btn-danger">Delete</button>
+			</td>
+		</tr>  
   `;
+
+  // containerPetsInfo.insertAdjacentHTML("beforeend", html);
+
+  containerPetsInfo.innerHTML += html;
 }
 
 // 4. Clear input form
 function clearInput() {
   // form.reset();
 
-  inputId.value =
-    inputName.value =
-    inputAge.value =
-    inputWeight.value =
-    inputLength.value =
-      "";
+  inputId.value = inputName.value = inputAge.value = inputWeight.value = inputLength.value = "";
   inputType.value = "Select Type";
   inputBreed.value = "Select Breed";
-  inputVaccinated.checked =
-    inputDewormed.checked =
-    inputSterilized.checked =
-      false;
+  inputVaccinated.checked = inputDewormed.checked = inputSterilized.checked = false;
 }
 
 // 5. Alert announcement
@@ -293,3 +274,36 @@ document.querySelectorAll(".btn-danger").forEach((btn) =>
     }
   })
 );
+
+// 7. Show healthy pet
+btnHealthy.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  // Clear container
+  containerPetsInfo.innerHTML = "";
+  btnHealthy.classList.toggle("show-all");
+
+  if (btnHealthy.classList.contains("show-all")) {
+    btnHealthy.textContent = " Show All Pet";
+    Array.from(petInfoArray.values())
+      .filter((v) => {
+        if (v.vaccinated && v.dewormed && v.sterilized) return v;
+      })
+      .map((v) => displayPetInfo(v));
+  } else {
+    btnHealthy.textContent = " Show Healthy Pet";
+    petInfoArray.values().forEach((pet) => displayPetInfo(pet));
+  }
+});
+
+// 8. Calculate BMI
+btnBMI.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  document.querySelectorAll(".bmi").forEach((e) => {
+    const id = e.closest("tr").querySelector("th").textContent;
+
+    const currPet = petInfoArray.get(id);
+    e.textContent = Math.round(currPet.bmi * 100) / 100;
+  });
+});
