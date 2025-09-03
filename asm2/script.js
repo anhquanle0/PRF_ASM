@@ -51,11 +51,11 @@ class PetData {
   }
 }
 
-addPet(new PetData("P001", "Dober Mix", 3, "Dog", "12 kg", "87 cm", "Doberman Pinscher", "Brown", true, true, true, "3/4/2022"));
-addPet(new PetData("P002", "Charlie Tux", 4, "Cat", "4 kg", "65 cm", "Tabby", "Light Green", true, false, false, "3/4/2022"));
-addPet(new PetData("P003", "Sweetie Pie", 3, "Dog", "6 kg", "45 cm", "Husky", "Red", false, false, true, "3/4/2022"));
-addPet(new PetData("P004", "Chocolate And Kitten", 4, "Cat", "6 kg", "87 cm", "Mixed Breed", "Yellow", false, false, false, "3/4/2022"));
-addPet(new PetData("P005", "Symph", 6, "Dog", "8 kg", "77 cm", "Doberman Pinscher", "Blue", true, true, true, "3/4/2022"));
+addPet(new PetData("P001", "Dober Mix", 3, "Dog", "12 kg", "87 cm", "Doberman Pinscher", "#e08f8f", true, true, true, "3/4/2022"));
+addPet(new PetData("P002", "Charlie Tux", 4, "Cat", "4 kg", "65 cm", "Tabby", "#8cee9c", true, false, false, "3/4/2022"));
+addPet(new PetData("P003", "Sweetie Pie", 3, "Dog", "6 kg", "45 cm", "Husky", "#ff1414", false, false, true, "3/4/2022"));
+addPet(new PetData("P004", "Chocolate And Kitten", 4, "Cat", "6 kg", "87 cm", "Mixed Breed", "#e9e22b", false, false, false, "3/4/2022"));
+addPet(new PetData("P005", "Symph", 6, "Dog", "8 kg", "77 cm", "Doberman Pinscher", "#46b4a7", true, true, true, "3/4/2022"));
 
 PetData.petInfoArray.forEach((pet) => displayPetInfo(pet));
 
@@ -168,8 +168,7 @@ function displayPetInfo(pet) {
 			</td>
 			<td><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
 			<td><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
-			<td><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>
-			<td><span class="bmi">?</span></td>
+			<td><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>			
 			<td>${pet.dateAdded}</td>
 			<td>
         <button type="button" class="btn btn-danger">Delete</button>
@@ -281,3 +280,15 @@ function addPet(pet) {
 ////////////////////////////////////
 ////////////////////////////////////
 // ASM02
+
+// 1. Sidebar toggle active
+sidebar.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (e.target && e.target.closest("li")) {
+    const href = e.target.closest("a")?.href;
+    window.location.href = href;
+  } else {
+    sidebar.classList.toggle("active");
+  }
+});
