@@ -50,12 +50,20 @@ class PetData {
     this.sterilized = sterilized;
   }
 }
+if (!getFromStorage("petInfo")) {
+  addPet(new PetData("P001", "Dober Mix", 3, "Dog", "12 kg", "87 cm", "Doberman Pinscher", "#e08f8f", true, true, true, "3/4/2022"));
+  addPet(new PetData("P002", "Charlie Tux", 4, "Cat", "4 kg", "65 cm", "Tabby", "#8cee9c", true, false, false, "3/4/2022"));
+  addPet(new PetData("P003", "Sweetie Pie", 3, "Dog", "6 kg", "45 cm", "Husky", "#ff1414", false, false, true, "3/4/2022"));
+  addPet(new PetData("P004", "Chocolate And Kitten", 4, "Cat", "6 kg", "87 cm", "Mixed Breed", "#e9e22b", false, false, false, "3/4/2022"));
+  addPet(new PetData("P005", "Symph", 6, "Dog", "8 kg", "77 cm", "Doberman Pinscher", "#46b4a7", true, true, true, "3/4/2022"));
 
-addPet(new PetData("P001", "Dober Mix", 3, "Dog", "12 kg", "87 cm", "Doberman Pinscher", "#e08f8f", true, true, true, "3/4/2022"));
-addPet(new PetData("P002", "Charlie Tux", 4, "Cat", "4 kg", "65 cm", "Tabby", "#8cee9c", true, false, false, "3/4/2022"));
-addPet(new PetData("P003", "Sweetie Pie", 3, "Dog", "6 kg", "45 cm", "Husky", "#ff1414", false, false, true, "3/4/2022"));
-addPet(new PetData("P004", "Chocolate And Kitten", 4, "Cat", "6 kg", "87 cm", "Mixed Breed", "#e9e22b", false, false, false, "3/4/2022"));
-addPet(new PetData("P005", "Symph", 6, "Dog", "8 kg", "77 cm", "Doberman Pinscher", "#46b4a7", true, true, true, "3/4/2022"));
+  saveToStorage("petInfo", PetData.petInfoArray.values());
+} else {
+  getFromStorage("petInfo").forEach((e) => {
+    const pet = Object.assign(new PetData(), e);
+    addPet(pet);
+  });
+}
 
 PetData.petInfoArray.forEach((pet) => displayPetInfo(pet));
 
@@ -82,6 +90,12 @@ btnSubmit.addEventListener("click", (e) => {
   if (validate(newPet)) {
     // display new pet
     displayPetInfo(newPet);
+
+    // updateData
+    addPet(newPet);
+
+    // update localStorage
+    saveToStorage("petInfo", PetData.petInfoArray.values());
 
     // clear input fields
     clearInput();
@@ -147,7 +161,7 @@ function validate(pet) {
     return false;
   }
 
-  return PetData.petInfoArray.set(pet.id, pet);
+  return true;
 }
 
 // Display info list
@@ -240,16 +254,24 @@ function showAlert(message) {
 }
 
 // Delete row
-document.querySelectorAll(".btn-danger").forEach((btn) =>
-  btn.addEventListener("click", (e) => {
+containerPetsInfo.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (e.target && e.target.closest(".btn-danger")) {
     if (confirm("Are you sure?")) {
       const row = e.target.closest("tr");
       const id = row.querySelector("th").textContent;
+      // delete from Map
       PetData.petInfoArray.delete(id);
+
+      // remove record
       row.remove();
+
+      // update localStorage
+      saveToStorage("petInfo", PetData.petInfoArray.values());
     }
-  })
-);
+  }
+});
 
 // Show healthy pet
 btnHealthy.addEventListener("click", (e) => {
@@ -292,3 +314,16 @@ sidebar.addEventListener("click", (e) => {
     sidebar.classList.toggle("active");
   }
 });
+
+// 2. Localstorage
+function saveToStorage(key, value) {
+  if (PetData.petInfoArray instanceof Map) {
+    localStorage.setItem(key, JSON.stringify(Array.from(value)));
+  } else {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+}
+
+function getFromStorage(key) {
+  return JSON.parse(localStorage.getItem(key));
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "ID": "P001",
+    "Name": "Dober Mix",
+    "Age": 3,
+    "Type": "Dog",
+    "Weight": "12 kg",
+    "Length": "87 cm",
+    "Breed": "Doberman Pinscher",
+    "Color": "Brown",
+    "Vaccinated": true,
+    "Dewormed": true,
+    "Sterilized": true,
+    "DateAdded": "2022-03-04"
+  },
+  {
+    "ID": "P002",
+    "Name": "Charlie Tux",
+    "Age": 4,
+    "Type": "Cat",
+    "Weight": "4 kg",
+    "Length": "65 cm",
+    "Breed": "Tabby",
+    "Color": "Light Green",
+    "Vaccinated": true,
+    "Dewormed": false,
+    "Sterilized": false,
+    "DateAdded": "2022-03-04"
+  },
+  {
+    "ID": "P003",
+    "Name": "Sweetie Pie",
+    "Age": 3,
+    "Type": "Dog",
+    "Weight": "6 kg",
+    "Length": "45 cm",
+    "Breed": "Husky",
+    "Color": "Red",
+    "Vaccinated": false,
+    "Dewormed": false,
+    "Sterilized": true,
+    "DateAdded": "2022-03-04"
+  },
+  {
+    "ID": "P004",
+    "Name": "Chocolate And Kitten",
+    "Age": 4,
+    "Type": "Cat",
+    "Weight": "6 kg",
+    "Length": "87 cm",
+    "Breed": "Mixed Breed",
+    "Color": "Yellow",
+    "Vaccinated": false,
+    "Dewormed": false,
+    "Sterilized": false,
+    "DateAdded": "2022-03-04"
+  },
+  {
+    "ID": "P005",
+    "Name": "Symph",
+    "Age": 6,
+    "Type": "Dog",
+    "Weight": "8 kg",
+    "Length": "77 cm",
+    "Breed": "Doberman Pinscher",
+    "Color": "Teal",
+    "Vaccinated": true,
+    "Dewormed": true,
+    "Sterilized": true,
+    "DateAdded": "2022-03-04"
+  }
+]
