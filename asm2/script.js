@@ -281,3 +281,26 @@ sidebar.addEventListener("click", (e) => {
 // function getFromStorage(k) {
 //   return JSON.parse(localStorage.getItem(k));
 // }
+
+// 3. Breed
+// inputType.addEventListener("change", (e) => {
+//   inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
+
+//   const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == inputType.value);
+
+//   breeds.forEach((el) => {
+//     inputBreed.innerHTML += `<option>${el.breed}</option>`;
+//   });
+// });
+
+function renderBreed(k) {
+  inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
+
+  const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == k);
+
+  breeds.forEach((el) => {
+    const option = document.createElement("option");
+    option.innerHTML = el.breed;
+    inputBreed.appendChild(option);
+  });
+}

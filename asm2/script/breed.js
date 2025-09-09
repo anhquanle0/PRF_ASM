@@ -42,6 +42,8 @@ function validate(breedObj) {
 }
 
 function renderBreedTable(breedArr) {
+  containerBreedsInfo.innerHTML = "";
+
   Array.from(breedArr)?.forEach((v, i) => {
     const html = `
     <tr>
