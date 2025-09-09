@@ -160,6 +160,7 @@ function clearInput() {
   inputId.value = inputName.value = inputAge.value = inputWeight.value = inputLength.value = "";
   inputType.value = "Select Type";
   inputBreed.value = "Select Breed";
+  inputColor.value = "#000";
   inputVaccinated.checked = inputDewormed.checked = inputSterilized.checked = false;
 }
 
@@ -204,7 +205,7 @@ function showAlert(message) {
   el.className = "toast";
   el.textContent = message;
   document.body.appendChild(el);
-  requestAnimationFrame(() => el.classList.add("show"));
+  requestAnimationFrame(() => el.classList.contains("show"));
   setTimeout(() => {
     el.classList.add("hide");
     el.addEventListener("transitionend", () => el.remove(), { once: true });
@@ -282,7 +283,7 @@ sidebar.addEventListener("click", (e) => {
 //   return JSON.parse(localStorage.getItem(k));
 // }
 
-// 3. Breed
+// 4. Breed
 // inputType.addEventListener("change", (e) => {
 //   inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
 
