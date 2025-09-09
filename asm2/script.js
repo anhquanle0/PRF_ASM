@@ -23,48 +23,6 @@ const inputSterilized = document.querySelector("#input-sterilized");
 ////////////////////////////////////
 ////////////////////////////////////
 
-class PetData {
-  static petInfoArray = new Map();
-
-  constructor(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded) {
-    if (arguments.length === 11) {
-      this._create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
-      this.dateAdded = new Date().toLocaleDateString("en-GB");
-    } else if (arguments.length === 12) {
-      this._create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
-      this.dateAdded = dateAdded;
-    }
-  }
-
-  _create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized) {
-    this.id = id;
-    this.name = name;
-    this.age = age;
-    this.type = type;
-    this.weight = weight;
-    this.length = length;
-    this.breed = breed;
-    this.color = color;
-    this.vaccinated = vaccinated;
-    this.dewormed = dewormed;
-    this.sterilized = sterilized;
-  }
-}
-if (!getFromStorage("petInfo")) {
-  addPet(new PetData("P001", "Dober Mix", 3, "Dog", "12 kg", "87 cm", "Doberman Pinscher", "#e08f8f", true, true, true, "3/4/2022"));
-  addPet(new PetData("P002", "Charlie Tux", 4, "Cat", "4 kg", "65 cm", "Tabby", "#8cee9c", true, false, false, "3/4/2022"));
-  addPet(new PetData("P003", "Sweetie Pie", 3, "Dog", "6 kg", "45 cm", "Husky", "#ff1414", false, false, true, "3/4/2022"));
-  addPet(new PetData("P004", "Chocolate And Kitten", 4, "Cat", "6 kg", "87 cm", "Mixed Breed", "#e9e22b", false, false, false, "3/4/2022"));
-  addPet(new PetData("P005", "Symph", 6, "Dog", "8 kg", "77 cm", "Doberman Pinscher", "#46b4a7", true, true, true, "3/4/2022"));
-
-  saveToStorage("petInfo", PetData.petInfoArray.values());
-} else {
-  getFromStorage("petInfo").forEach((e) => {
-    const pet = Object.assign(new PetData(), e);
-    addPet(pet);
-  });
-}
-
 PetData.petInfoArray.forEach((pet) => displayPetInfo(pet));
 
 // Submit form
@@ -92,10 +50,10 @@ btnSubmit.addEventListener("click", (e) => {
     displayPetInfo(newPet);
 
     // updateData
-    addPet(newPet);
+    PetData.petInfoArray.set(newPet.id, newPet);
 
     // update localStorage
-    saveToStorage("petInfo", PetData.petInfoArray.values());
+    saveToStorage("petInfo", PetData.petInfoArray);
 
     // clear input fields
     clearInput();
@@ -166,7 +124,7 @@ function validate(pet) {
 
 // Display info list
 function displayPetInfo(pet) {
-  const name = pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "";
+  const name = pet.name ? pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "" : "Unnamed";
 
   const html = `
 		<tr>
@@ -174,8 +132,8 @@ function displayPetInfo(pet) {
 			<td>${name}</td>
 			<td>${pet.age}</td>
 			<td>${pet.type}</td>
-			<td>${pet.weight} kg</td>
-			<td>${pet.lenght} cm</td>
+			<td>${pet.weight ? pet.weight + "kg" : undefined}</td>
+			<td>${pet.length ? pet.length + "cm" : undefined}</td>
 			<td>${pet.breed}</td>
 			<td>
 			  <i class="bi bi-square-fill" style="color: ${pet.color}"></i>
@@ -268,7 +226,7 @@ containerPetsInfo.addEventListener("click", (e) => {
       row.remove();
 
       // update localStorage
-      saveToStorage("petInfo", PetData.petInfoArray.values());
+      saveToStorage("petInfo", PetData.petInfoArray);
     }
   }
 });
@@ -294,10 +252,6 @@ btnHealthy.addEventListener("click", (e) => {
   }
 });
 
-function addPet(pet) {
-  PetData.petInfoArray.set(pet.id, pet);
-}
-
 ////////////////////////////////////
 ////////////////////////////////////
 ////////////////////////////////////
@@ -316,14 +270,14 @@ sidebar.addEventListener("click", (e) => {
 });
 
 // 2. Localstorage
-function saveToStorage(key, value) {
-  if (PetData.petInfoArray instanceof Map) {
-    localStorage.setItem(key, JSON.stringify(Array.from(value)));
-  } else {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-}
+// function saveToStorage(k, v) {
+//   if (v instanceof Map) {
+//     localStorage.setItem(k, JSON.stringify(Array.from(v.values())));
+//   } else {
+//     localStorage.setItem(k, JSON.stringify(v));
+//   }
+// }
 
-function getFromStorage(key) {
-  return JSON.parse(localStorage.getItem(key));
-}
+// function getFromStorage(k) {
+//   return JSON.parse(localStorage.getItem(k));
+// }
