@@ -107,8 +107,8 @@
                 <div class="form-group row mb-3">
                   <label for="input-type" class="col-sm-3 col-form-label">Type</label>
                   <div class="col-sm-9">
-                    <select class="form-control" id="input-type">
-                      <option>Select Type</option>
+                    <select class="form-control" id="input-type" onchange="renderBreed(this.value)">
+                      <option disabled selected hidden>Select Type</option>
                       <option>Dog</option>
                       <option>Cat</option>
                     </select>
@@ -133,7 +133,7 @@
                   <label for="input-breed" class="col-sm-3 col-form-label" style="text-align: right">Breed</label>
                   <div class="col-sm-3">
                     <select class="form-control" id="input-breed">
-                      <option>Select Breed</option>
+                      <option disabled selected hidden>Select Breed</option>
                     </select>
                   </div>
                 </div>

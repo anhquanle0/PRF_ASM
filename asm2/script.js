@@ -10,10 +10,10 @@ const btnBMI = document.querySelector("#bmi-btn");
 const inputId = document.querySelector("#input-id");
 const inputName = document.querySelector("#input-name");
 const inputAge = document.querySelector("#input-age");
-const inputType = document.querySelector("#input-type");
+// const inputType = document.querySelector("#input-type");
 const inputWeight = document.querySelector("#input-weight");
 const inputLength = document.querySelector("#input-length");
-const inputBreed = document.querySelector("#input-breed");
+// const inputBreed = document.querySelector("#input-breed");
 const inputColor = document.querySelector("#input-color-1");
 const inputVaccinated = document.querySelector("#input-vaccinated");
 const inputDewormed = document.querySelector("#input-dewormed");
@@ -23,7 +23,8 @@ const inputSterilized = document.querySelector("#input-sterilized");
 ////////////////////////////////////
 ////////////////////////////////////
 
-PetData.petInfoArray.forEach((pet) => displayPetInfo(pet));
+const petArr = new Map(initialPets);
+displayPetInfo(petArr);
 
 // Submit form
 btnSubmit.addEventListener("click", (e) => {
@@ -46,14 +47,14 @@ btnSubmit.addEventListener("click", (e) => {
 
   // validate data
   if (validate(newPet)) {
-    // display new pet
-    displayPetInfo(newPet);
-
     // updateData
-    PetData.petInfoArray.set(newPet.id, newPet);
+    petArr.set(newPet.id, newPet);
+
+    // display new pet
+    displayPetInfo(petArr);
 
     // update localStorage
-    saveToStorage("petInfo", PetData.petInfoArray);
+    saveToStorage("pet", petArr);
 
     // clear input fields
     clearInput();
@@ -65,55 +66,61 @@ function validate(pet) {
   const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
   const numberPattern = /^\d+$/;
 
-  // a. Type-safe
+  // Type-safe
   if (!pet instanceof PetData) return false;
 
-  // b. Unique ID
-  if (pet.id == "") {
+  // Unique ID
+  if (!pet.id) {
     showAlert("Vui lòng nhập ID");
     inputId.focus();
     return false;
-  } else if (Array.from(PetData.petInfoArray.keys()).includes(pet.id)) {
+  } else if (Array.from(petArr.keys()).includes(pet.id)) {
     showAlert("ID đã tồn tại");
     inputId.focus();
     return false;
   }
 
-  // c. Name
-  if (!namePattern.test(pet.name)) {
-    showAlert("Tên không được tồn tại chữ số");
+  // Name
+  if (!pet.name) {
+    showAlert("Tên không được để trống");
     inputName.focus();
     return false;
+  } else {
+    if (!namePattern.test(pet.name)) {
+      showAlert("Tên không được tồn tại chữ số");
+      inputName.focus();
+      return false;
+    }
   }
 
-  // d. Age
+  // Age
   if (!numberPattern.test(pet.age) || pet.age <= 0 || pet.age > 50) {
     showAlert("Tuổi không phù hợp");
     inputAge.focus();
     return false;
   }
 
-  // e. Type
+  // Type
   if (pet.type == "Select Type") {
     showAlert("Hãy chọn loại pet");
     return false;
   }
 
-  // f. Weight
+  // Weight
   if (!numberPattern.test(pet.weight) || pet.weight <= 5 || pet.weight > 100) {
     showAlert("Hãy điền số cân nặng phù hợp");
     inputWeight.focus();
     return false;
   }
 
-  // g. Length
+  // Length
   if (!numberPattern.test(pet.length) || pet.length <= 10 || pet.length > 200) {
     showAlert("Hãy điền chiều dài phù hợp");
     inputLength.focus();
     return false;
   }
 
-  // h. Breed
+  // Breed
   if (pet.breed == "Select Breed") {
     showAlert("Hãy chọn thức ăn cho pet");
     return false;
@@ -123,10 +130,14 @@ function validate(pet) {
 }
 
 // Display info list
-function displayPetInfo(pet) {
-  const name = pet.name ? pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "" : "Unnamed";
+function displayPetInfo(list) {
+  // Clear container
+  containerPetsInfo.innerHTML = "";
 
-  const html = `
+  (list instanceof Map ? Array.from(list.values()) : list).forEach((pet) => {
+    const name = pet.name ? pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "" : "Unnamed";
+
+    const html = `
 		<tr>
 			<th scope="row">${pet.id}</th>
 			<td>${name}</td>
@@ -148,9 +159,10 @@ function displayPetInfo(pet) {
 		</tr>  
   `;
 
-  // containerPetsInfo.insertAdjacentHTML("beforeend", html);
+    // containerPetsInfo.insertAdjacentHTML("beforeend", html);
 
-  containerPetsInfo.innerHTML += html;
+    containerPetsInfo.innerHTML += html;
+  });
 }
 
 // Clear input form
@@ -160,59 +172,11 @@ function clearInput() {
   inputId.value = inputName.value = inputAge.value = inputWeight.value = inputLength.value = "";
   inputType.value = "Select Type";
   inputBreed.value = "Select Breed";
-  inputColor.value = "#000";
+  inputColor.value = "#000000";
   inputVaccinated.checked = inputDewormed.checked = inputSterilized.checked = false;
 }
 
-// Alert announcement
-function showAlert(message) {
-  if (!document.getElementById("toast-style")) {
-    const css = `
-        .toast {
-          position: fixed; 
-          top: 0; 
-          right: 20px; 
-          margin-top: 20px; 
-          z-index: 9999;
-          background:#fff; 
-          color:#ff1a1a; 
-          font-size: 16px;
-          padding:10px 16px; 
-          border-radius:6px;
-          font-family:sans-serif; 
-          box-shadow:0 2px 8px rgba(0,0,0,.2);
-          display:inline-block; 
-          width:fit-content; 
-          width:-moz-fit-content; 
-          width:max-content;
-          max-width:80vw; 
-          white-space:normal; 
-          overflow-wrap:anywhere; 
-          word-break:break-word;
-          opacity:0; 
-          transform:translateY(-100%); 
-          transition:transform .35s ease, opacity .35s ease;
-        }
-        .toast.show { opacity:1; transform:translateY(0); }
-        .toast.hide { opacity:0; transform:translateY(-60%); }
-      `;
-    const s = document.createElement("style");
-    s.id = "toast-style";
-    s.textContent = css;
-    document.head.appendChild(s);
-  }
-  const el = document.createElement("div");
-  el.className = "toast";
-  el.textContent = message;
-  document.body.appendChild(el);
-  requestAnimationFrame(() => el.classList.contains("show"));
-  setTimeout(() => {
-    el.classList.add("hide");
-    el.addEventListener("transitionend", () => el.remove(), { once: true });
-  }, 3000);
-}
-
-// Delete row
+// Event handler DELETE btn
 containerPetsInfo.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -221,13 +185,13 @@ containerPetsInfo.addEventListener("click", (e) => {
       const row = e.target.closest("tr");
       const id = row.querySelector("th").textContent;
       // delete from Map
-      PetData.petInfoArray.delete(id);
+      petArr.delete(id);
 
       // remove record
       row.remove();
 
       // update localStorage
-      saveToStorage("petInfo", PetData.petInfoArray);
+      saveToStorage("pet", petArr);
     }
   }
 });
@@ -242,14 +206,14 @@ btnHealthy.addEventListener("click", (e) => {
 
   if (btnHealthy.classList.contains("show-all")) {
     btnHealthy.textContent = " Show All Pet";
-    Array.from(PetData.petInfoArray.values())
-      .filter((v) => {
+    displayPetInfo(
+      Array.from(petArr.values()).filter((v) => {
         if (v.vaccinated && v.dewormed && v.sterilized) return v;
       })
-      .map((v) => displayPetInfo(v));
+    );
   } else {
     btnHealthy.textContent = " Show Healthy Pet";
-    PetData.petInfoArray.values().forEach((pet) => displayPetInfo(pet));
+    displayPetInfo(petArr);
   }
 });
 
@@ -259,16 +223,16 @@ btnHealthy.addEventListener("click", (e) => {
 // ASM02
 
 // 1. Sidebar toggle active
-sidebar.addEventListener("click", (e) => {
-  e.preventDefault();
+// sidebar.addEventListener("click", (e) => {
+//   e.preventDefault();
 
-  if (e.target && e.target.closest("li")) {
-    const href = e.target.closest("a")?.href;
-    window.location.href = href;
-  } else {
-    sidebar.classList.toggle("active");
-  }
-});
+//   if (e.target && e.target.closest("li")) {
+//     const href = e.target.closest("a")?.href;
+//     window.location.href = href;
+//   } else {
+//     sidebar.classList.toggle("active");
+//   }
+// });
 
 // 2. Localstorage
 // function saveToStorage(k, v) {
@@ -294,14 +258,14 @@ sidebar.addEventListener("click", (e) => {
 //   });
 // });
 
-function renderBreed(k) {
-  inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
+// function renderBreed(type) {
+//   inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
 
-  const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == k);
+//   const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == type);
 
-  breeds.forEach((el) => {
-    const option = document.createElement("option");
-    option.innerHTML = el.breed;
-    inputBreed.appendChild(option);
-  });
-}
+//   breeds.forEach((el) => {
+//     const option = document.createElement("option");
+//     option.innerHTML = el.breed;
+//     inputBreed.appendChild(option);
+//   });
+// }

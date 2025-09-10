@@ -4,35 +4,14 @@ const containerPetsInfo = document.querySelector("#tbody");
 
 const inputId = document.querySelector("#input-id");
 const inputName = document.querySelector("#input-name");
-const inputType = document.querySelector("#input-type");
-const inputBreed = document.querySelector("#input-breed");
+// const inputType = document.querySelector("#input-type");
+// const inputBreed = document.querySelector("#input-breed");
 const inputVaccinated = document.querySelector("#input-vaccinated");
 const inputDewormed = document.querySelector("#input-dewormed");
 const inputSterilized = document.querySelector("#input-sterilized");
 0;
 
-// // Lưu trữ sự thay đổi của các input
-// let changedFields = {};
-
-// // Lắng nghe sự kiện change trên tất cả các input
-// document.querySelectorAll("input, select").forEach((input) => {
-//   input.addEventListener("change", function () {
-//     if (input.type === "checkbox") {
-//       changedFields[input.id] = input.checked ? "true" : "false";
-//     } else {
-//       changedFields[input.id] = input.value;
-//     }
-//   });
-// });
-
-// // Lắng nghe sự kiện click trên nút "Find"
-// document.querySelector("#find-btn").addEventListener("click", () => {
-//   // Duyệt qua các input đã thay đổi
-//   for (const [id, value] of Object.entries(changedFields)) {
-//     console.log(`Field ID: ${id}, Value: ${value}`);
-//   }
-// });
-
+// Show breeds based on selected type
 inputType.addEventListener("change", (e) => {
   inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
 
@@ -43,6 +22,7 @@ inputType.addEventListener("change", (e) => {
   });
 });
 
+// Event handler for find btn
 document.querySelector("#find-btn").addEventListener("click", (e) => {
   const id = inputId.value;
   const name = inputName.value;
@@ -52,23 +32,21 @@ document.querySelector("#find-btn").addEventListener("click", (e) => {
   const dewormed = inputDewormed.checked;
   const sterilized = inputSterilized.checked;
 
-  console.log(id, name, type, breed, vaccinated, dewormed, sterilized);
-
-  const filteredPets = Array.from(PetData.petInfoArray.values()).filter((pet) => {
-    return (
-      (id ? pet.id?.toString().includes(id) : true) &&
+  const filteredPets = Array.from(initialPets.values()).filter(
+    (pet) =>
+      (id ? pet.id?.toLowerCase().includes(id.toLowerCase()) : true) &&
       (name ? pet.name?.toLowerCase().includes(name.toLowerCase()) : true) &&
       (type !== "Select Type" ? pet.type == type : true) &&
       (breed !== "Select Breed" ? pet.breed == breed : true) &&
       (vaccinated ? pet.vaccinated == vaccinated : true) &&
       (dewormed ? pet.dewormed == dewormed : true) &&
       (sterilized ? pet.sterilized == sterilized : true)
-    );
-  });
+  );
 
   displayPetInfo(filteredPets);
 });
 
+// display pet's info list
 function displayPetInfo(list) {
   containerPetsInfo.innerHTML = "";
 

@@ -3,48 +3,47 @@
 const containerBreedsInfo = document.querySelector("#tbody");
 const btnSubmit = document.querySelector("#submit-btn");
 
-const inputBreed = document.querySelector("#input-breed");
-const inputType = document.querySelector("#input-type");
+// const inputBreed = document.querySelector("#input-breed");
+// const inputType = document.querySelector("#input-type");
 
-let breedArr = initialBreed ?? [];
+let breedArr = initialBreeds ?? [];
 renderBreedTable(breedArr);
 
+// 1. Event handler for SUBMIT btn
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
-  const breedObj = new BreedData(inputBreed.value, inputType.value);
+  const newBreed = new BreedData(inputBreed.value, inputType.value);
 
-  if (validate(breedObj)) {
-    breedArr = [...breedArr, breedObj];
+  if (validate(newBreed)) {
+    breedArr = [...breedArr, newBreed];
 
     renderBreedTable(breedArr);
 
-    console.log(breedObj);
-
-    saveToStorage("breed", [...getFromStorage("breed"), breedObj]);
+    saveToStorage("breed", breedArr);
   }
 });
 
+// 2. Validate input fields functionality
 function validate(breedObj) {
-  // Breed
-  if (breedObj.breed == "Select Breed") {
-    console.error("Hãy chọn thức ăn cho pet");
+  if (!breedObj.breed) {
+    alert("Please enter breed");
     return false;
   }
 
-  // Type
   if (breedObj.type == "Select Type") {
-    showAlert("Hãy chọn loại pet");
+    alert("Please select type");
     return false;
   }
 
   return true;
 }
 
-function renderBreedTable(breedArr) {
+// 3. Show breed list functionality
+function renderBreedTable(list) {
   containerBreedsInfo.innerHTML = "";
 
-  Array.from(breedArr)?.forEach((v, i) => {
+  Array.from(list)?.forEach((v, i) => {
     const html = `
     <tr>
       <th scope="row">${i + 1}</th>
@@ -60,6 +59,7 @@ function renderBreedTable(breedArr) {
   });
 }
 
+// 4. Event handler for DELETE btn
 containerBreedsInfo.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -68,14 +68,13 @@ containerBreedsInfo.addEventListener("click", (e) => {
       const row = e.target.closest("tr");
       const id = row.querySelector("th").textContent;
 
-      // remove record
       row.remove();
 
-      // update data
       breedArr.splice(id - 1, 1);
 
-      // update localStorage
       saveToStorage("breed", breedArr);
+
+      renderBreedTable(breedArr);
     }
   }
 });

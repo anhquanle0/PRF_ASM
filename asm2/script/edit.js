@@ -1,26 +1,27 @@
 "use strict";
 
-const containerPetsEdit = document.querySelector("#tbody");
 const form = document.querySelector("#container-form");
+const containerPetsEdit = document.querySelector("#tbody");
 
 const btnSubmit = document.querySelector("#submit-btn");
 
 const inputId = document.querySelector("#input-id");
 const inputName = document.querySelector("#input-name");
 const inputAge = document.querySelector("#input-age");
-const inputType = document.querySelector("#input-type");
+// const inputType = document.querySelector("#input-type");
 const inputWeight = document.querySelector("#input-weight");
 const inputLength = document.querySelector("#input-length");
-const inputBreed = document.querySelector("#input-breed");
+// const inputBreed = document.querySelector("#input-breed");
 const inputColor = document.querySelector("#input-color-1");
 const inputVaccinated = document.querySelector("#input-vaccinated");
 const inputDewormed = document.querySelector("#input-dewormed");
 const inputSterilized = document.querySelector("#input-sterilized");
 
-// Render data
-displayPetInfo(PetData.petInfoArray);
+// 1. Render data from localStorage
+const petArr = initialPets ?? new Map();
+displayPetInfo(petArr);
 
-// // Display info list
+// 2. Display pet's info list
 function displayPetInfo(list) {
   containerPetsEdit.innerHTML = "";
 
@@ -53,7 +54,7 @@ function displayPetInfo(list) {
   });
 }
 
-// Edit event handle
+// 3. Event handler for EDIT btn
 containerPetsEdit.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -83,32 +84,20 @@ containerPetsEdit.addEventListener("click", (e) => {
     inputDewormed.checked = isChecked(dewormed);
     inputSterilized.checked = isChecked(sterilized);
 
-    inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
+    renderBreed(inputType.value);
 
-    const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == inputType.value);
-    breeds.forEach((el) => {
-      inputBreed.innerHTML += `<option>${el.breed}</option>`;
-    });
     inputBreed.value = breed;
 
     form.classList.remove("hide");
   }
 });
 
-inputType.addEventListener("change", (e) => {
-  inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
-
-  const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == inputType.value);
-
-  breeds.forEach((el) => {
-    inputBreed.innerHTML += `<option>${el.breed}</option>`;
-  });
-});
-
+// Convert String input to number
 function retrieveNumbers(input) {
   return +input.match(/\d+/g);
 }
 
+// Convert rgb to hex color
 function rgbToHex(rgb) {
   const rgbArray = rgb.match(/\d+/g);
   const hex = rgbArray
@@ -120,10 +109,12 @@ function rgbToHex(rgb) {
   return `#${hex}`;
 }
 
+// Checking true/flase fields
 function isChecked(input) {
   return input.querySelector("i").classList.contains("bi-check-circle-fill");
 }
 
+// Event handler for SUBMIT form for pet info changing
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -143,13 +134,13 @@ btnSubmit.addEventListener("click", (e) => {
   const newPet = new PetData(id.toUpperCase(), name, age, type, weight, lenght, breed, color, vaccinated, dewormed, sterilized);
 
   // updateData
-  PetData.petInfoArray.set(newPet.id, newPet);
+  initialPets.set(newPet.id, newPet);
 
   // display pets
-  displayPetInfo(PetData.petInfoArray);
+  displayPetInfo(initialPets);
 
   // update localStorage
-  saveToStorage("petInfo", PetData.petInfoArray);
+  saveToStorage("pet", initialPets);
 
   document.querySelector("form").reset();
 
