@@ -71,23 +71,23 @@ function validate(pet) {
 
   // Unique ID
   if (!pet.id) {
-    showAlert("Vui lòng nhập ID");
+    showToast("Vui lòng nhập ID");
     inputId.focus();
     return false;
   } else if (Array.from(petArr.keys()).includes(pet.id)) {
-    showAlert("ID đã tồn tại");
+    showToast("ID đã tồn tại");
     inputId.focus();
     return false;
   }
 
   // Name
   if (!pet.name) {
-    showAlert("Tên không được để trống");
+    showToast("Tên không được để trống");
     inputName.focus();
     return false;
   } else {
     if (!namePattern.test(pet.name)) {
-      showAlert("Tên không được tồn tại chữ số");
+      showToast("Tên không được tồn tại chữ số");
       inputName.focus();
       return false;
     }
@@ -95,34 +95,34 @@ function validate(pet) {
 
   // Age
   if (!numberPattern.test(pet.age) || pet.age <= 0 || pet.age > 50) {
-    showAlert("Tuổi không phù hợp");
+    showToast("Tuổi không phù hợp");
     inputAge.focus();
     return false;
   }
 
   // Type
   if (pet.type == "Select Type") {
-    showAlert("Hãy chọn loại pet");
+    showToast("Hãy chọn loại pet");
     return false;
   }
 
   // Weight
   if (!numberPattern.test(pet.weight) || pet.weight <= 5 || pet.weight > 100) {
-    showAlert("Hãy điền số cân nặng phù hợp");
+    showToast("Hãy điền số cân nặng phù hợp");
     inputWeight.focus();
     return false;
   }
 
   // Length
   if (!numberPattern.test(pet.length) || pet.length <= 10 || pet.length > 200) {
-    showAlert("Hãy điền chiều dài phù hợp");
+    showToast("Hãy điền chiều dài phù hợp");
     inputLength.focus();
     return false;
   }
 
   // Breed
   if (pet.breed == "Select Breed") {
-    showAlert("Hãy chọn thức ăn cho pet");
+    showToast("Hãy chọn thức ăn cho pet");
     return false;
   }
 
@@ -136,6 +136,7 @@ function displayPetInfo(list) {
 
   (list instanceof Map ? Array.from(list.values()) : list).forEach((pet) => {
     const name = pet.name ? pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "" : "Unnamed";
+    const dateAdded = new Date(pet.dateAdded).toLocaleDateString("en-US");
 
     const html = `
 		<tr>
@@ -152,7 +153,7 @@ function displayPetInfo(list) {
 			<td><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
 			<td><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
 			<td><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>			
-			<td>${pet.dateAdded}</td>
+			<td>${dateAdded}</td>
 			<td>
         <button type="button" class="btn btn-danger">Delete</button>
 			</td>

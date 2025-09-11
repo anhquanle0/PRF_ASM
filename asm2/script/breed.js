@@ -21,23 +21,27 @@ btnSubmit.addEventListener("click", (e) => {
     renderBreedTable(breedArr);
 
     saveToStorage("breed", breedArr);
+
+    showToast("Breed added", "success");
+  } else {
+    showToast("This breed is existed");
   }
 });
 
 // 2. Validate input fields functionality
 function validate(breedObj) {
   if (!breedObj.breed) {
-    alert("Please enter breed");
+    showToast("Please enter breed");
     return false;
   }
 
   if (breedObj.type == "Select Type") {
-    alert("Please select type");
+    showToast("Please select type");
     return false;
   }
-
-  return true;
 }
+
+const compare = (a, b) => a.toLowerCase().trim() === b.toLowerCase().trim();
 
 // 3. Show breed list functionality
 function renderBreedTable(list) {

@@ -52,6 +52,7 @@ function displayPetInfo(list) {
 
   list.forEach((pet) => {
     const name = pet.name ? pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "" : "Unnamed";
+    const dateAdded = new Date(pet.dateAdded).toLocaleDateString("en-US");
 
     const html = `
 		<tr>
@@ -68,7 +69,7 @@ function displayPetInfo(list) {
 			<td id="pet-vaccinated"><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
 			<td id="pet-dewormed"><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
 			<td id="pet-sterilized"><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>			
-			<td id="pet-date">${pet.dateAdded}</td>
+			<td id="pet-date">${dateAdded}</td>
 			<td>
         <button type="button" class="btn btn-warning">Edit</button>
 			</td>
