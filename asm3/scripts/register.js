@@ -6,22 +6,7 @@ const inputUsername = document.querySelector("#input-username");
 const inputPassword = document.querySelector("#input-password");
 const inputPasswordConfirm = document.querySelector("#input-password-confirm");
 
-const btnSubmit = document.querySelector("#btn-submit");
-
-const KEY = "USER_ARRAY";
-
-class User {
-  constructor(firstName, lastName, username, password) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.username = username;
-    this.password = password;
-  }
-
-  static from({ firstName, lastName, username, password }) {
-    return new User(firstName, lastName, username, password);
-  }
-}
+const btnRegister = document.querySelector("#btn-submit");
 
 let userArr = Array.from(getFromStorage(KEY)).map((el) => User.from(el)) ?? [
   new User("John", "Doe", "johndoe", "password123"),
@@ -65,16 +50,16 @@ function validateUser({ firstName, lastName, username, password }, passwordC) {
   return true;
 }
 
-window.warning = function (selector, message) {
+function warning(selector, message) {
   selector.focus();
   console.log(message);
-};
+}
 
 /////////////////////////////////
 /////////////////////////////////
 /////////////////////////////////
 
-btnSubmit.addEventListener("click", (e) => {
+btnRegister.addEventListener("click", (e) => {
   e.preventDefault();
 
   const fName = inputFirstName.value.trim();

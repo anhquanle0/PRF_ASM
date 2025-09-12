@@ -10936,12 +10936,3 @@ a[data-toggle="collapse"] {
 .subscribe-form .form-control {
   background: #4897fc;
 }
-
-.warning {
-  color: red;
-  background: transparent;
-  font-weight: 600;
-  margin-left: auto;
-  text-align: end;
-  position: absolute;
-}
