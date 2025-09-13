@@ -2,7 +2,7 @@
 
 const KEY = "USER_ARRAY";
 
-const API_KEY = "4374df249925490cb3ad9a565d7fac29";
+const API_KEY = "2dc4e55d48ed4f8ea8f9f92662633f0f";
 
 class User {
   constructor(firstName, lastName, username, password) {
@@ -16,17 +16,22 @@ class User {
     return new User(firstName, lastName, username, password);
   }
 
-  static async getData(page) {
-    const url = `https://newsapi.org/v2/everything?q=*&sortBy=publishedAt&pageSize=10&page=${page}&language=en&apiKey=${API_KEY}`;
+  static async getData(pageSize = "10", page, category, country = "us") {
+    const url = `https://newsapi.org/v2/top-headlines?country=${country}&${category ? `category=${category}&` : ""}pageSize=${pageSize}&${
+      page ? `page=${page}&` : ""
+    }language=en&apiKey=${API_KEY}`;
     try {
       const response = await fetch(url);
 
       if (!response.ok) throw new Error(`Response status: ${response.status}`);
 
-      const { articles } = await response.json();
-      return articles;
+      const { status, totalResults, articles } = await response.json();
+
+      console.log(totalResults, Array.from(articles).length);
+      return [articles, Math.floor(totalResults / pageSize) + 1];
     } catch (err) {
       console.error("Fetch error:", err);
+      return null;
     }
   }
 }

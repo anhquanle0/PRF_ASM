@@ -19,11 +19,12 @@ const btnNext = document.querySelector("#btn-next");
 //   .catch((error) => {
 //     console.error("Fetch error:", error);
 //   });
+btnPrev.setAttribute("style", "display: none;");
 
 let data = [];
 
-User.getData(1).then((res) => {
-  data = [...res];
+User.getData(10, 1, "science").then(([news, maxPage]) => {
+  data = [...news];
 
   renderNew(data);
 });
@@ -31,24 +32,24 @@ User.getData(1).then((res) => {
 function renderNew(news) {
   newsContainer.innerHTML = "";
 
-  news.forEach(({ author, content, description, publishedAt, source, title, url, urlToImage }) => {
-    if (!urlToImage) return;
-
+  Array.from(news).forEach(({ author, content, description, publishedAt, source, title, url, urlToImage }) => {
     const html = `
             <div class="card flex-row flex-wrap">
             <div class="card mb-3" style="">
               <div class="row no-gutters">
                 <div class="col-md-4">
                   <img
-                    src="${urlToImage}"
+                    src="${urlToImage || "../fallback.jpg"}"
                     class="card-img"
-                    alt="${title}" />
+                    alt="${title || "Untitled"}"
+                    onerror="this.onerror=null; this.src='../fallback.jpg';"
+                  />
                 </div>
                 <div class="col-md-8">
                   <div class="card-body">
-                    <h5 class="card-title">${title}</h5>
-                    <p class="card-text">${description}</p>
-                    <a href="${url}" class="btn btn-primary">View</a>
+                    <h5 class="card-title">${title || "Untitled"}</h5>
+                    <p class="card-text">${description || ""}</p>
+                    <a href="${url}" target="_blank" class="btn btn-primary">View</a>
                   </div>
                 </div>
               </div>
@@ -59,3 +60,37 @@ function renderNew(news) {
     newsContainer.insertAdjacentHTML("beforeend", html);
   });
 }
+
+btnNext.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  const page = +pageNumber.innerText + 1;
+
+  btnPrev.setAttribute("style", "display: block;");
+
+  // Render news
+  User.getData(10, page, "science")?.then(([news, maxPage]) => {
+    if (page == maxPage) {
+      btnNext.setAttribute("style", "display: none;");
+    }
+
+    renderNew([...news]);
+    pageNumber.innerText = page;
+  });
+});
+
+btnPrev.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  const page = +pageNumber.innerText - 1;
+
+  btnNext.setAttribute("style", "display: block;");
+
+  if (!page == 0) {
+    pageNumber.innerText = page;
+
+    // Render news
+    User.getData(10, page, "science")?.then(([news, maxPage]) => renderNew([...news]));
+  }
+  if (page == 1) btnPrev.setAttribute("style", "display: none;");
+});
