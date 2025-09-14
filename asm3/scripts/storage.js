@@ -11,3 +11,13 @@ function saveToStorage(k, v) {
 function getFromStorage(k) {
   return JSON.parse(localStorage.getItem(k));
 }
+
+//////////////////////////////
+//////////////////////////////
+//////////////////////////////
+
+if (!getFromStorage(KEY)) {
+  saveToStorage(KEY, userArr);
+} else {
+  userArr = [...getFromStorage(KEY)]?.map((el) => User.from(el));
+}

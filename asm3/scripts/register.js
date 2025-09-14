@@ -6,21 +6,35 @@ const inputUsername = document.querySelector("#input-username");
 const inputPassword = document.querySelector("#input-password");
 const inputPasswordConfirm = document.querySelector("#input-password-confirm");
 
-const btnRegister = document.querySelector("#btn-submit");
+const btnSubmit = document.querySelector("#btn-submit");
 
-let userArr = Array.from(getFromStorage(KEY)).map((el) => User.from(el)) ?? [
-  new User("John", "Doe", "johndoe", "password123"),
-  new User("Jane", "Smith", "janesmith", "mypassword"),
-  new User("Minh", "Nguyen", "minhnguyen", "123456"),
-  new User("Linh", "Tran", "linhtran", "linh@2024"),
-  new User("Bao", "Pham", "baopham", "bao!secure"),
-];
+btnSubmit.addEventListener("click", (e) => {
+  const fName = inputFirstName.value.trim();
+  const lName = inputLastName.value.trim();
+  const username = inputUsername.value;
+  const password = inputPassword.value;
+  const passwordC = inputPasswordConfirm.value;
+  const newUser = new User(fName, lName, username, password);
 
-saveToStorage(KEY, userArr);
+  if (validateUser(newUser, passwordC)) {
+    userArr.push(newUser);
+    saveToStorage(KEY, userArr);
+    setTimeout(() => (window.location.href = "login.html"), 300);
+  }
+});
 
-function validateUser({ firstName, lastName, username, password }, passwordC) {
+document.querySelector("form").addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+    btnSubmit.click();
+  }
+});
+
+function validateUser(user, passwordC) {
   const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
   const passwordPattern = /^.{9,}$/;
+
+  const { firstName, lastName, username, password } = user;
 
   if (!firstName || !namePattern.test(firstName)) {
     warning(inputFirstName, "Invalid first name");
@@ -54,27 +68,3 @@ function warning(selector, message) {
   selector.focus();
   console.log(message);
 }
-
-/////////////////////////////////
-/////////////////////////////////
-/////////////////////////////////
-
-btnRegister.addEventListener("click", (e) => {
-  e.preventDefault();
-
-  const fName = inputFirstName.value.trim();
-  const lName = inputLastName.value.trim();
-  const username = inputUsername.value;
-  const password = inputPassword.value;
-  const passwordC = inputPasswordConfirm.value;
-
-  const newUser = new User(fName, lName, username, password);
-
-  if (!validateUser(newUser, passwordC)) {
-    userArr.push(newUser);
-
-    saveToStorage(KEY, userArr);
-
-    setTimeout(() => (window.location.href = "login.html"), 300);
-  }
-});

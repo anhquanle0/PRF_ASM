@@ -20,6 +20,7 @@ class User {
     const url = `https://newsapi.org/v2/top-headlines?country=${country}&${category ? `category=${category}&` : ""}pageSize=${pageSize}&${
       page ? `page=${page}&` : ""
     }language=en&apiKey=${API_KEY}`;
+
     try {
       const response = await fetch(url);
 
@@ -27,7 +28,6 @@ class User {
 
       const { status, totalResults, articles } = await response.json();
 
-      console.log(totalResults, Array.from(articles).length);
       return [articles, Math.floor(totalResults / pageSize) + 1];
     } catch (err) {
       console.error("Fetch error:", err);
@@ -35,3 +35,12 @@ class User {
     }
   }
 }
+
+// initial data
+let userArr = [
+  new User("John", "Doe", "johndoe", "password123"),
+  new User("Jane", "Smith", "janesmith", "mypassword"),
+  new User("Minh", "Nguyen", "minhnguyen", "123456"),
+  new User("Linh", "Tran", "linhtran", "linh@2024"),
+  new User("Bao", "Pham", "baopham", "bao!secure"),
+];

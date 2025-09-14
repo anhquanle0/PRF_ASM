@@ -1,15 +1,11 @@
 "use strict";
 
-let userArr = Array.from(getFromStorage(KEY)).map((el) => User.from(el)) ?? [];
-
 const inputUsername = document.querySelector("#input-username");
 const inputPassword = document.querySelector("#input-password");
 
 const btnLogin = document.querySelector("#btn-submit");
 
 btnLogin.addEventListener("click", (e) => {
-  e.preventDefault();
-
   const username = inputUsername.value;
   const password = inputPassword.value;
 
@@ -17,9 +13,15 @@ btnLogin.addEventListener("click", (e) => {
     const currentUser = userArr.find((el) => el.username == username);
 
     saveToStorage("CUR_USER", currentUser);
-    console.log(currentUser);
 
     setTimeout(() => (window.location.href = "../index.html"), 300);
+  }
+});
+
+document.querySelector("form").addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+    btnLogin.click();
   }
 });
 

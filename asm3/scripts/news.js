@@ -6,6 +6,10 @@ const btnPrev = document.querySelector("#btn-prev");
 const pageNumber = document.querySelector("#page-num");
 const btnNext = document.querySelector("#btn-next");
 
+if (!getFromStorage("CUR_USER")) {
+  window.location.href = "login.html";
+}
+
 // fetch("https://newsapi.org/v2/everything?q=*&sortBy=publishedAt&pageSize=100&language=en&apiKey=4374df249925490cb3ad9a565d7fac29")
 //   .then((response) => {
 //     if (!response.ok) {
@@ -19,6 +23,7 @@ const btnNext = document.querySelector("#btn-next");
 //   .catch((error) => {
 //     console.error("Fetch error:", error);
 //   });
+
 btnPrev.setAttribute("style", "display: none;");
 
 let data = [];
