@@ -1,40 +1,47 @@
 "use strict";
+const inputQuery = document.querySelector("#input-query");
 
-const newsContainer = document.querySelector("#news-container");
-
+const btnSubmit = document.querySelector("#btn-submit");
 const btnPrev = document.querySelector("#btn-prev");
 const pageNumber = document.querySelector("#page-num");
 const btnNext = document.querySelector("#btn-next");
 
-if (!getFromStorage("CUR_USER")) {
-  window.location.href = "login.html";
-}
-
-// fetch("https://newsapi.org/v2/everything?q=*&sortBy=publishedAt&pageSize=100&language=en&apiKey=4374df249925490cb3ad9a565d7fac29")
-//   .then((response) => {
-//     if (!response.ok) {
-//       throw new Error("Network response was not ok");
-//     }
-//     return response.json();
-//   })
-//   .then(({ articles }) => {
-//     articles.forEach((el) => console.log(el.title));
-//   })
-//   .catch((error) => {
-//     console.error("Fetch error:", error);
-//   });
+const newsContainer = document.querySelector("#news-container");
 
 let data = [];
 
 ///////////////////////////////////////////
+if (!getFromStorage("CUR_USER")) {
+  window.location.href = "login.html";
+}
+
 btnPrev.setAttribute("style", "display: none;");
-
-User.getData(1).then(([news, maxPage]) => {
-  data = [...news];
-
-  renderNew(data);
-});
 ///////////////////////////////////////////
+
+btnSubmit.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  const query = getQuery();
+
+  if (!query) {
+    console.log("Invalid search key");
+    return;
+  }
+
+  User.findNews(1, query).then(([news, maxPage]) => {
+    data = [...news];
+    if (data.length == 0) {
+      newsContainer.innerHTML = `
+      <p style="text-align: center; font-size: 24px">No matching results found</p>
+      `;
+    } else renderNew(data);
+  });
+});
+
+function getQuery() {
+  return (inputQuery.value + "").toLowerCase();
+}
+
 function renderNew(news) {
   newsContainer.innerHTML = "";
 
@@ -71,11 +78,17 @@ btnNext.addEventListener("click", (e) => {
   e.preventDefault();
 
   const page = +pageNumber.innerText + 1;
+  const query = getQuery();
+
+  if (!query) {
+    console.log("Invalid search key");
+    return;
+  }
 
   btnPrev.setAttribute("style", "display: block;");
 
   // Render news
-  User.getData(page)?.then(([news, maxPage]) => {
+  User.findNews(page, query)?.then(([news, maxPage]) => {
     if (page == maxPage) {
       btnNext.setAttribute("style", "display: none;");
     }
@@ -89,6 +102,12 @@ btnPrev.addEventListener("click", (e) => {
   e.preventDefault();
 
   const page = +pageNumber.innerText - 1;
+  const query = getQuery();
+
+  if (!query) {
+    console.log("Invalid search key");
+    return;
+  }
 
   btnNext.setAttribute("style", "display: block;");
 
@@ -96,7 +115,15 @@ btnPrev.addEventListener("click", (e) => {
     pageNumber.innerText = page;
 
     // Render news
-    User.getData(page)?.then(([news, maxPage]) => renderNew([...news]));
+    User.findNews(page, query)?.then(([news, maxPage]) => renderNew([...news]));
   }
   if (page == 1) btnPrev.setAttribute("style", "display: none;");
 });
+
+function goToHead() {
+  document.querySelector("#nav-page-num").addEventListener("click", (e) => {
+    if (e.target && e.target.closest("form")) {
+      document.querySelector("h2").scrollIntoView({ behavior: "smooth" });
+    }
+  });
+}

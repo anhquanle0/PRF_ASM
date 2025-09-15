@@ -19,10 +19,12 @@ class User {
     return new User(firstName, lastName, username, password);
   }
 
-  static async getData(page, pageSize = User.PAGE_SIZE, category = User.CATEGORY, country = "us") {
+  static async getData(page, query, category = User.CATEGORY, pageSize = User.PAGE_SIZE, country = "us") {
     const url = `https://newsapi.org/v2/top-headlines?country=${country}&pageSize=${pageSize}&category=${category}&${
       page ? `page=${page}&` : ""
-    }language=en&apiKey=${API_KEY}`;
+    }language=en&${query ? `q=${query}&` : ""}apiKey=${API_KEY}`;
+
+    console.log(url);
 
     try {
       const response = await fetch(url);
@@ -36,6 +38,10 @@ class User {
       console.error("Fetch error:", err);
       return null;
     }
+  }
+
+  static findNews(page, query, category) {
+    return User.getData(page, query, category ?? User.CATEGORY);
   }
 }
 

@@ -7,15 +7,8 @@ const btnSubmit = document.querySelector("#btn-submit");
 
 if (!getFromStorage("CUR_USER")) window.location.href = "login.html";
 
-if (!getFromStorage("settings")) {
-  inputPage.value = 10;
-  inputCategory.value = "General";
-} else {
-  const [page, category] = getFromStorage("settings");
-
-  inputPage.value = page;
-  inputCategory.value = category;
-}
+inputPage.value = User.PAGE_SIZE;
+inputCategory.value = User.CATEGORY;
 
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();

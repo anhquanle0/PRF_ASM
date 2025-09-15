@@ -21,3 +21,13 @@ if (!getFromStorage(KEY)) {
 } else {
   userArr = [...getFromStorage(KEY)]?.map((el) => User.from(el));
 }
+
+if (!getFromStorage("settings")) {
+  User.PAGE_SIZE = 10;
+  User.CATEGORY = "General";
+
+  saveToStorage("settings", [User.PAGE_SIZE, User.CATEGORY]);
+} else {
+  User.PAGE_SIZE = +getFromStorage("settings")[0];
+  User.CATEGORY = getFromStorage("settings")[1] + "";
+}
