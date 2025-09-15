@@ -5,6 +5,9 @@ const KEY = "USER_ARRAY";
 const API_KEY = "2dc4e55d48ed4f8ea8f9f92662633f0f";
 
 class User {
+  static PAGE_SIZE;
+  static CATEGORY;
+
   constructor(firstName, lastName, username, password) {
     this.firstName = firstName;
     this.lastName = lastName;
@@ -16,8 +19,8 @@ class User {
     return new User(firstName, lastName, username, password);
   }
 
-  static async getData(pageSize = "10", page, category, country = "us") {
-    const url = `https://newsapi.org/v2/top-headlines?country=${country}&${category ? `category=${category}&` : ""}pageSize=${pageSize}&${
+  static async getData(page, pageSize = User.PAGE_SIZE, category = User.CATEGORY, country = "us") {
+    const url = `https://newsapi.org/v2/top-headlines?country=${country}&pageSize=${pageSize}&category=${category}&${
       page ? `page=${page}&` : ""
     }language=en&apiKey=${API_KEY}`;
 

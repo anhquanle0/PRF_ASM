@@ -28,7 +28,16 @@ btnPrev.setAttribute("style", "display: none;");
 
 let data = [];
 
-User.getData(10, 1, "science").then(([news, maxPage]) => {
+const [page, category] = [10, "general"];
+if (!getFromStorage("settings")) {
+  User.PAGE_SIZE = page;
+  User.CATEGORY = category;
+} else {
+  User.PAGE_SIZE = +getFromStorage("settings")[0];
+  User.CATEGORY = (getFromStorage("settings")[1] + "").toLowerCase();
+}
+
+User.getData(1).then(([news, maxPage]) => {
   data = [...news];
 
   renderNew(data);
@@ -74,7 +83,7 @@ btnNext.addEventListener("click", (e) => {
   btnPrev.setAttribute("style", "display: block;");
 
   // Render news
-  User.getData(10, page, "science")?.then(([news, maxPage]) => {
+  User.getData(page)?.then(([news, maxPage]) => {
     if (page == maxPage) {
       btnNext.setAttribute("style", "display: none;");
     }
@@ -95,7 +104,7 @@ btnPrev.addEventListener("click", (e) => {
     pageNumber.innerText = page;
 
     // Render news
-    User.getData(10, page, "science")?.then(([news, maxPage]) => renderNew([...news]));
+    User.getData(page)?.then(([news, maxPage]) => renderNew([...news]));
   }
   if (page == 1) btnPrev.setAttribute("style", "display: none;");
 });
