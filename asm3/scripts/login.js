@@ -5,6 +5,7 @@ const inputPassword = document.querySelector("#input-password");
 
 const btnLogin = document.querySelector("#btn-submit");
 
+// Form submit event handle
 btnLogin.addEventListener("click", (e) => {
   const username = inputUsername.value;
   const password = inputPassword.value;
@@ -18,6 +19,7 @@ btnLogin.addEventListener("click", (e) => {
   }
 });
 
+// Event handler from 'ENTER' keydown
 document.querySelector("form").addEventListener("keydown", (e) => {
   if (e.key == "Enter") {
     e.preventDefault();
@@ -25,28 +27,30 @@ document.querySelector("form").addEventListener("keydown", (e) => {
   }
 });
 
+// Validate input fields
 function validate(username, password) {
   const userAcc = new Map(Array.from(userArr).map((el) => [el.username, el.password]));
 
   if (!username) {
-    printErr(inputUsername, "Input fiedls cannot be empty");
+    warning(inputUsername, "Input fiedls cannot be empty");
     return false;
   }
 
   if (!password) {
-    printErr(inputPassword, "Input fiedls cannot be empty");
+    warning(inputPassword, "Input fiedls cannot be empty");
     return false;
   }
 
   if (userAcc.get(username) != password) {
-    printErr(null, "Username or password maybe wrong");
+    warning(null, "Username or password maybe wrong");
     return false;
   }
 
   return true;
 }
 
-function printErr(selector, message) {
+// Annoucement
+function warning(selector, message) {
   selector?.focus();
-  console.log(message);
+  alert(message);
 }

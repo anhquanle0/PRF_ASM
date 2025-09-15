@@ -3,6 +3,10 @@
 const TODO_KEY = "todo";
 
 const containerTodoList = document.querySelector("#todo-list");
+const inputTask = document.querySelector("#input-task");
+const btnAdd = document.querySelector("#btn-add");
+
+const { username } = getFromStorage("CUR_USER");
 
 class Todo {
   constructor(task, owner, isDone = false) {
@@ -16,10 +20,10 @@ class Todo {
   }
 }
 
+// If is logged in yet, navigate to Login page
 if (!getFromStorage("CUR_USER")) window.location.href = "login.html";
 
-const { username } = getFromStorage("CUR_USER");
-
+// Initial data
 let todoArr = [
   new Todo("Meet George", "johndoe"),
   new Todo("Buy eggs", "minhnguyen"),
@@ -37,8 +41,40 @@ if (!getFromStorage(TODO_KEY)) {
   todoArr = [...getFromStorage(TODO_KEY)]?.map((el) => Todo.from(el));
 }
 
+// Render curUser's todo list
 renderTodoList(getMyList());
 
+// Add new task event handler
+btnAdd.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  const task = inputTask.value;
+  if (!task) {
+    console.log("Enter your task name");
+    return;
+  }
+
+  const newTask = new Todo(task, username);
+
+  todoArr.push(newTask);
+
+  saveToStorage(TODO_KEY, todoArr);
+
+  renderTodoList(getMyList());
+
+  inputTask.value = "";
+});
+
+// Event handler from 'ENTER' keydown
+inputTask.addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+
+    btnAdd.click();
+  }
+});
+
+// Render list function
 function renderTodoList(list) {
   containerTodoList.innerHTML = "";
 
@@ -51,6 +87,7 @@ function renderTodoList(list) {
   });
 }
 
+// Toggle taks isDone state
 containerTodoList.addEventListener("click", (e) => {
   const todo = e.target.closest("li");
 
@@ -65,6 +102,7 @@ containerTodoList.addEventListener("click", (e) => {
   }
 });
 
+// Remove taks event handler
 containerTodoList.addEventListener("click", (e) => {
   if (e.target && e.target.closest(".close")) {
     const [i, { task, owner, isDone }] = findTodo(e.target);
@@ -77,6 +115,7 @@ containerTodoList.addEventListener("click", (e) => {
   }
 });
 
+// Find task & its index
 function findTodo(target) {
   const todo = target?.closest("li");
 
@@ -91,6 +130,7 @@ function findTodo(target) {
   return [i, existedTodo];
 }
 
+// Get curUser todo list
 function getMyList() {
   return todoArr.filter(({ owner }) => owner == username);
 }

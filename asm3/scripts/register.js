@@ -8,6 +8,7 @@ const inputPasswordConfirm = document.querySelector("#input-password-confirm");
 
 const btnSubmit = document.querySelector("#btn-submit");
 
+// Form submit
 btnSubmit.addEventListener("click", (e) => {
   const fName = inputFirstName.value.trim();
   const lName = inputLastName.value.trim();
@@ -18,11 +19,14 @@ btnSubmit.addEventListener("click", (e) => {
 
   if (validateUser(newUser, passwordC)) {
     userArr.push(newUser);
+
     saveToStorage(KEY, userArr);
+
     setTimeout(() => (window.location.href = "login.html"), 300);
   }
 });
 
+// Event handler from 'ENTER' keydown
 document.querySelector("form").addEventListener("keydown", (e) => {
   if (e.key == "Enter") {
     e.preventDefault();
@@ -30,6 +34,7 @@ document.querySelector("form").addEventListener("keydown", (e) => {
   }
 });
 
+// Validate inputs fields
 function validateUser(user, passwordC) {
   const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
   const passwordPattern = /^.{9,}$/;
@@ -64,7 +69,8 @@ function validateUser(user, passwordC) {
   return true;
 }
 
+// Annoucement
 function warning(selector, message) {
-  selector.focus();
-  console.log(message);
+  selector?.focus();
+  alert(message);
 }

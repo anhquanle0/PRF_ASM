@@ -6,10 +6,6 @@ const btnPrev = document.querySelector("#btn-prev");
 const pageNumber = document.querySelector("#page-num");
 const btnNext = document.querySelector("#btn-next");
 
-if (!getFromStorage("CUR_USER")) {
-  window.location.href = "login.html";
-}
-
 // fetch("https://newsapi.org/v2/everything?q=*&sortBy=publishedAt&pageSize=100&language=en&apiKey=4374df249925490cb3ad9a565d7fac29")
 //   .then((response) => {
 //     if (!response.ok) {
@@ -24,17 +20,21 @@ if (!getFromStorage("CUR_USER")) {
 //     console.error("Fetch error:", error);
 //   });
 
-let data = [];
+// If is logged in yet, navigate to Login page
+if (!getFromStorage("CUR_USER")) window.location.href = "login.html";
 
-///////////////////////////////////////////
+// Hide btnPrev
 btnPrev.setAttribute("style", "display: none;");
 
+// Render initial news
+let data = [];
 User.getData(1).then(([news, maxPage]) => {
   data = [...news];
 
   renderNew(data);
 });
-///////////////////////////////////////////
+
+// Render news function
 function renderNew(news) {
   newsContainer.innerHTML = "";
 
@@ -67,6 +67,7 @@ function renderNew(news) {
   });
 }
 
+// btnNext event handler
 btnNext.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -85,6 +86,7 @@ btnNext.addEventListener("click", (e) => {
   });
 });
 
+// btnPrev event handler
 btnPrev.addEventListener("click", (e) => {
   e.preventDefault();
 

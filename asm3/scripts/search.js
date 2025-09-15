@@ -1,32 +1,38 @@
 "use strict";
-const inputQuery = document.querySelector("#input-query");
 
 const btnSubmit = document.querySelector("#btn-submit");
 const btnPrev = document.querySelector("#btn-prev");
 const pageNumber = document.querySelector("#page-num");
 const btnNext = document.querySelector("#btn-next");
 
+const inputQuery = document.querySelector("#input-query");
+
 const newsContainer = document.querySelector("#news-container");
 
+const form = document.querySelector("form");
+
 let data = [];
+let query;
 
-///////////////////////////////////////////
-if (!getFromStorage("CUR_USER")) {
-  window.location.href = "login.html";
-}
+// If is logged in yet, navigate to Login page
+if (!getFromStorage("CUR_USER")) window.location.href = "login.html";
 
+// Hide btnPrev
 btnPrev.setAttribute("style", "display: none;");
-///////////////////////////////////////////
 
+// Search btn event handler
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
-  const query = getQuery();
+  query = (inputQuery.value + "").toLowerCase();
 
   if (!query) {
-    console.log("Invalid search key");
+    console.log("Search key cannot be empty");
     return;
   }
+
+  inputQuery.blur();
+  inputQuery.value = "";
 
   User.findNews(1, query).then(([news, maxPage]) => {
     data = [...news];
@@ -38,10 +44,16 @@ btnSubmit.addEventListener("click", (e) => {
   });
 });
 
-function getQuery() {
-  return (inputQuery.value + "").toLowerCase();
-}
+// Event handler from 'ENTER' keydown
+form.addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
 
+    btnSubmit.click();
+  }
+});
+
+// Render news function
 function renderNew(news) {
   newsContainer.innerHTML = "";
 
@@ -74,14 +86,14 @@ function renderNew(news) {
   });
 }
 
+// btnNext event handler
 btnNext.addEventListener("click", (e) => {
   e.preventDefault();
 
   const page = +pageNumber.innerText + 1;
-  const query = getQuery();
 
   if (!query) {
-    console.log("Invalid search key");
+    console.log("Search key cannot be empty");
     return;
   }
 
@@ -96,16 +108,18 @@ btnNext.addEventListener("click", (e) => {
     renderNew([...news]);
     pageNumber.innerText = page;
   });
+
+  goToHead();
 });
 
+// btnPrev event handler
 btnPrev.addEventListener("click", (e) => {
   e.preventDefault();
 
   const page = +pageNumber.innerText - 1;
-  const query = getQuery();
 
   if (!query) {
-    console.log("Invalid search key");
+    console.log("Search key cannot be empty");
     return;
   }
 
@@ -118,12 +132,15 @@ btnPrev.addEventListener("click", (e) => {
     User.findNews(page, query)?.then(([news, maxPage]) => renderNew([...news]));
   }
   if (page == 1) btnPrev.setAttribute("style", "display: none;");
+
+  goToHead();
 });
 
+// 'Go to head page' function
 function goToHead() {
   document.querySelector("#nav-page-num").addEventListener("click", (e) => {
-    if (e.target && e.target.closest("form")) {
-      document.querySelector("h2").scrollIntoView({ behavior: "smooth" });
+    if (e.target && e.target.closest("button")) {
+      document.querySelector("#content").scrollIntoView({ behavior: "smooth" });
     }
   });
 }
