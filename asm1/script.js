@@ -26,17 +26,7 @@ class PetData {
   bmi = 0;
 
   constructor(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded) {
-    if (arguments.length === 11) {
-      this._create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
-      this.dateAdded = new Date().toLocaleDateString("en-GB");
-    } else if (arguments.length === 12) {
-      this._create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
-      this.dateAdded = dateAdded;
-    }
-  }
-
-  _create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized) {
-    this.id = id;
+    this.id = id.toUpperCase();
     this.name = name;
     this.age = age;
     this.type = type;
@@ -47,24 +37,27 @@ class PetData {
     this.vaccinated = vaccinated;
     this.dewormed = dewormed;
     this.sterilized = sterilized;
+    this.dateAdded = new Date(dateAdded || Date.now());
     this.bmi = this._getBMI();
   }
 
   _getBMI() {
-    return (this.weight * 886) / this.length / this.length;
+    if ((this.type + "").toLowerCase() == "dog") {
+      return (this.weight * 703) / this.length ** 2;
+    }
+    return (this.weight * 886) / this.length ** 2;
   }
 }
 
 const pet1 = new PetData("P001", "Tom", 3, "Cat", 5, 50, "Tabby", "red", true, true, true, "2022/03/01");
 const pet2 = new PetData("P002", "Tyke", 5, "Dog", 3, 40, "Mixed Breed", "green", false, false, false, "2022/03/02");
 
-// use map to distinct the PetID
-const petInfoArray = new Map();
-petInfoArray.set(pet1.id, pet1);
-petInfoArray.set(pet2.id, pet2);
+const petArr = [];
+petArr.push(pet1);
+petArr.push(pet2);
 
 // print out the initial data
-petInfoArray.forEach((pet) => displayPetInfo(pet));
+renderTableData(petArr);
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -74,7 +67,7 @@ petInfoArray.forEach((pet) => displayPetInfo(pet));
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
-  // retrieve data
+  // 2. retrieve data
   const id = inputId.value;
   const name = inputName.value;
   const age = inputAge.value;
@@ -87,125 +80,138 @@ btnSubmit.addEventListener("click", (e) => {
   const dewormed = inputDewormed.checked;
   const sterilized = inputSterilized.checked;
 
-  const newPet = new PetData(
-    id.toUpperCase(),
-    name,
-    age,
-    type,
-    weight,
-    lenght,
-    breed,
-    color,
-    vaccinated,
-    dewormed,
-    sterilized
-  );
+  const newPet = new PetData(id, name, age, type, weight, lenght, breed, color, vaccinated, dewormed, sterilized, 0);
 
-  // validate data
+  // 3. validate data
   if (validate(newPet)) {
-    // display new pet
-    displayPetInfo(newPet);
+    petArr.push(newPet);
 
-    // clear input fields
+    // 4. Render pet list
+    renderTableData(petArr);
+
+    // 5. Clear input fields
     clearInput();
   }
 });
 
-// 2. Validate data function
+// Validate data function
 function validate(pet) {
   const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
   const numberPattern = /^\d+$/;
 
-  // a. Type-safe
+  const { id, name, age, type, weight, length, breed } = pet;
+
+  // Type-safe
   if (!pet instanceof PetData) return false;
 
-  // b. Unique ID
-  if (pet.id == "") {
-    showAlert("Vui lòng nhập ID");
-    inputId.focus();
-    return false;
-  } else if (Array.from(petInfoArray.keys()).includes(pet.id)) {
-    showAlert("ID đã tồn tại");
-    inputId.focus();
+  if (!id || !name || !age || !weight || !length) {
+    alert("Inputs cannot be empty");
     return false;
   }
 
-  // c. Name
-  if (!namePattern.test(pet.name)) {
-    showAlert("Tên không được tồn tại chữ số");
-    inputName.focus();
+  // Unique ID
+  const [existedPet] = findPet(id);
+  if (existedPet) {
+    warning("ID must be unique!", inputId);
     return false;
   }
 
-  // d. Age
-  if (!numberPattern.test(pet.age) || pet.age <= 0 || pet.age > 50) {
-    showAlert("Tuổi không phù hợp");
-    inputAge.focus();
+  // Name
+  if (!namePattern.test(name)) {
+    warning("Name cannot be included number!", inputName);
     return false;
   }
 
-  // e. Type
-  if (pet.type == "Select Type") {
-    showAlert("Hãy chọn loại pet");
+  // Age
+  if (!numberPattern.test(age) || age < 1 || age > 15) {
+    warning("Age must be between 1 and 15!", inputAge);
     return false;
   }
 
-  // f. Weight
-  if (!numberPattern.test(pet.weight) || pet.weight <= 5 || pet.weight > 100) {
-    showAlert("Hãy điền số cân nặng phù hợp");
-    inputWeight.focus();
+  // Type
+  if (type == "Select Type") {
+    warning("Please select Type!", inputType);
     return false;
   }
 
-  // g. Length
-  if (!numberPattern.test(pet.length) || pet.length <= 10 || pet.length > 200) {
-    showAlert("Hãy điền chiều dài phù hợp");
-    inputLength.focus();
+  // Weight
+  if (!numberPattern.test(weight) || weight < 1 || weight > 15) {
+    warning("Weight must be between 1 and 15!", inputWeight);
     return false;
   }
 
-  // h. Breed
-  if (pet.breed == "Select Breed") {
-    showAlert("Hãy chọn thức ăn cho pet");
+  // Length
+  if (!numberPattern.test(length) || length < 1 || length > 100) {
+    warning("Length must be between 1 and 100!", inputLength);
     return false;
   }
 
-  return petInfoArray.set(pet.id, pet);
+  // Breed
+  if (breed == "Select Breed") {
+    warning("Please select Breed!", inputBreed);
+    return false;
+  }
+
+  return true;
 }
 
-// 3. Display info list
-function displayPetInfo(pet) {
-  const name = pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "";
+// Find pet function
+function findPet(id) {
+  const existedPet = petArr.find((pet) => pet.id == id);
+  const index = petArr.findIndex((pet) => pet.id == id);
 
-  const html = `
+  return [existedPet, index];
+}
+
+// Warning message and focus on its input field
+function warning(messages, inputSelector) {
+  showAlert(messages);
+  inputSelector?.focus();
+}
+
+// Display info list function
+function renderTableData(pets) {
+  containerPetsInfo.innerHTML = "";
+
+  [...pets].forEach((pet) => {
+    console.log(pet);
+    const { id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded } = pet;
+    const petName = name[0].toUpperCase() + name.slice(1).toLowerCase() + "";
+
+    const formattedDate = new Intl.DateTimeFormat("en-GB", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dateAdded);
+
+    const html = `
 		<tr>
-			<th scope="row">${pet.id}</th>
-			<td>${name}</td>
-			<td>${pet.age}</td>
-			<td>${pet.type}</td>
-			<td>${pet.weight} kg</td>
-			<td>${pet.lenght} cm</td>
-			<td>${pet.breed}</td>
+			<th scope="row">${id}</th>
+			<td>${petName}</td>
+			<td>${age}</td>
+			<td>${type}</td>
+			<td>${weight} kg</td>
+			<td>${length} cm</td>
+			<td>${breed}</td>
 			<td>
-			  <i class="bi bi-square-fill" style="color: ${pet.color}"></i>
+			  <i class="bi bi-square-fill" style="color: ${color}"></i>
 			</td>
-			<td><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
-			<td><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
-			<td><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${vaccinated ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${dewormed ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${sterilized ? "check" : "x"}-circle-fill"></i></td>
 			<td><span class="bmi">?</span></td>
-			<td>${pet.dateAdded}</td>
+			<td>${formattedDate}</td>
 			<td>
         <button type="button" class="btn btn-danger">Delete</button>
 			</td>
 		</tr>  
   `;
 
-  // containerPetsInfo.insertAdjacentHTML("beforeend", html);
-
-  containerPetsInfo.innerHTML += html;
+    containerPetsInfo.insertAdjacentHTML("beforeend", html);
+  });
 }
 
-// 4. Clear input form
+// Clear input form function
 function clearInput() {
   // form.reset();
 
@@ -215,7 +221,7 @@ function clearInput() {
   inputVaccinated.checked = inputDewormed.checked = inputSterilized.checked = false;
 }
 
-// 5. Alert announcement
+// Alert announcement
 function showAlert(message) {
   if (!document.getElementById("toast-style")) {
     const css = `
@@ -263,47 +269,49 @@ function showAlert(message) {
   }, 3000);
 }
 
-// 6. Delete row
-document.querySelectorAll(".btn-danger").forEach((btn) =>
-  btn.addEventListener("click", (e) => {
+// 6. Delete record
+containerPetsInfo.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (e.target && e.target.matches("button")) {
     if (confirm("Are you sure?")) {
       const row = e.target.closest("tr");
       const id = row.querySelector("th").textContent;
-      petInfoArray.delete(id);
+      const [, petIndex] = findPet(id);
+
+      petArr.splice(petIndex, 1);
+
       row.remove();
     }
-  })
-);
+  }
+});
 
 // 7. Show healthy pet
 btnHealthy.addEventListener("click", (e) => {
   e.preventDefault();
 
   // Clear container
-  containerPetsInfo.innerHTML = "";
   btnHealthy.classList.toggle("show-all");
 
   if (btnHealthy.classList.contains("show-all")) {
     btnHealthy.textContent = " Show All Pet";
-    Array.from(petInfoArray.values())
-      .filter((v) => {
-        if (v.vaccinated && v.dewormed && v.sterilized) return v;
-      })
-      .map((v) => displayPetInfo(v));
+
+    const healthyPets = petArr.filter((pet) => pet.vaccinated && pet.dewormed && pet.sterilized);
+    renderTableData(healthyPets);
   } else {
     btnHealthy.textContent = " Show Healthy Pet";
-    petInfoArray.values().forEach((pet) => displayPetInfo(pet));
+    renderTableData(petArr);
   }
 });
 
-// 8. Calculate BMI
+// 9. Calculate BMI
 btnBMI.addEventListener("click", (e) => {
   e.preventDefault();
 
   document.querySelectorAll(".bmi").forEach((e) => {
     const id = e.closest("tr").querySelector("th").textContent;
 
-    const currPet = petInfoArray.get(id);
+    const [currPet] = findPet(id);
     e.textContent = Math.round(currPet.bmi * 100) / 100;
   });
 });

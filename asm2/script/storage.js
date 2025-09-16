@@ -1,8 +1,44 @@
 "use strict";
 
-const sidebar = document.querySelector("#sidebar");
+function saveToStorage(k, v) {
+  if (v instanceof Map) {
+    localStorage.setItem(k, JSON.stringify(Array.from(v.values())));
+  } else {
+    localStorage.setItem(k, JSON.stringify(v));
+  }
+}
 
-const inputType = document.querySelector("#input-type");
+function getFromStorage(k) {
+  return JSON.parse(localStorage.getItem(k));
+}
+
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
+
+const sidebar = document.querySelector("#sidebar");
+if (localStorage.getItem("sidebar")) {
+  if (getFromStorage("sidebar")) {
+    sidebar.classList.add("active");
+  } else {
+    sidebar.classList.remove("active");
+  }
+}
+
+// Sidebar active toggle
+sidebar.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (e.target && e.target.closest("li")) {
+    const href = e.target.closest("a")?.href;
+    window.location.href = href;
+  } else {
+    sidebar.classList.toggle("active");
+    const isActived = sidebar.classList.contains("active");
+    saveToStorage("sidebar", isActived);
+  }
+});
+
 const inputBreed = document.querySelector("#input-breed");
 
 // Utils
@@ -284,18 +320,6 @@ const inputBreed = document.querySelector("#input-breed");
 // }
 
 // Sidebar active toggle
-sidebar.addEventListener("click", (e) => {
-  e.preventDefault();
-
-  if (e.target && e.target.closest("li")) {
-    const href = e.target.closest("a")?.href;
-    window.location.href = href;
-  } else {
-    sidebar.classList.toggle("active");
-    const isActived = sidebar.classList.contains("active");
-    saveToStorage("sidebar", isActived);
-  }
-});
 
 if (localStorage.getItem("sidebar")) {
   if (getFromStorage("sidebar")) {
@@ -329,32 +353,13 @@ function sortBreed(arr) {
   });
 }
 
-function sortPet(list) {
-  if (!list instanceof Map) return null;
-
-  const valid = Array.from(list.values()).every((pet) => pet instanceof PetData);
-  if (!valid) return null;
-
-  return new Map([...list.entries()].sort((a, b) => a[0].localeCompare(b[0])));
-}
-
 ////////////////////////////////////
 ////////////////////////////////////
 ////////////////////////////////////
 // Retrieve data
 class PetData {
   constructor(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded) {
-    if (arguments.length === 11) {
-      this._create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
-      this.dateAdded = new Date();
-    } else if (arguments.length === 12) {
-      this._create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
-      this.dateAdded = new Date(dateAdded);
-    }
-  }
-
-  _create(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized) {
-    this.id = id;
+    this.id = id.toUpperCase();
     this.name = name;
     this.age = age;
     this.type = type;
@@ -365,6 +370,11 @@ class PetData {
     this.vaccinated = vaccinated;
     this.dewormed = dewormed;
     this.sterilized = sterilized;
+    this.dateAdded = new Date(dateAdded || Date.now());
+  }
+
+  static from({ id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded }) {
+    return new PetData(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded);
   }
 }
 
@@ -378,12 +388,8 @@ if (!getFromStorage("pet")) {
 
   saveToStorage("pet", initialPets);
 } else {
-  getFromStorage("pet").forEach((e) => {
-    const pet = Object.assign(new PetData(), e);
-    addPet(pet);
-  });
+  getFromStorage("pet").forEach((el) => addPet(PetData.from(el)));
 }
-initialPets = sortPet(initialPets);
 
 function addPet(pet) {
   initialPets.set(pet.id, pet);
@@ -417,19 +423,3 @@ if (!getFromStorage("breed")) {
 }
 sortBreed(initialBreeds);
 console.log(initialBreeds);
-
-////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////////
-
-function saveToStorage(k, v) {
-  if (v instanceof Map) {
-    localStorage.setItem(k, JSON.stringify(Array.from(v.values())));
-  } else {
-    localStorage.setItem(k, JSON.stringify(v));
-  }
-}
-
-function getFromStorage(k) {
-  return JSON.parse(localStorage.getItem(k));
-}
