@@ -11,7 +11,7 @@ if (!curUser) {
   main.style.display = "none";
 } else {
   loginModal.style.display = "none";
-  message.innerText = `Welcome back, ${curUser?.firstName}`;
+  message.innerText = `Welcome back, ${curUser.firstName}`;
 }
 
 // Event handler for LOGOUT button

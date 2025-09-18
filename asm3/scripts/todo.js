@@ -121,18 +121,18 @@ containerTodoList.addEventListener("click", (e) => {
 function findTodo(eventTarget) {
   const todo = eventTarget?.closest("li");
 
-  const existedTask = Array.from(todo.childNodes)
+  const taskName = Array.from(todo.childNodes)
     .filter((node) => node.nodeType === Node.TEXT_NODE)
     .map((node) => node.textContent.trim())
     .join("");
 
-  const i = todoArr.findIndex(({ owner, task }) => owner == curUser?.username && task == existedTask);
-  const existedTodo = todoArr.find(({ owner, task }) => owner == curUser?.username && task == existedTask);
+  const i = todoArr.findIndex(({ owner, task }) => owner == curUser.username && task == taskName);
+  const curTask = todoArr.find(({ owner, task }) => owner == curUser.username && task == taskName);
 
-  return [i, existedTodo];
+  return [i, curTask];
 }
 
 // Get curUser todo list
 function getMyList() {
-  return todoArr.filter(({ owner }) => owner == curUser?.username);
+  return todoArr.filter(({ owner }) => owner == curUser.username);
 }
