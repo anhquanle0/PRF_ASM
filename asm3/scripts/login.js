@@ -4,53 +4,53 @@ const inputUsername = document.querySelector("#input-username");
 const inputPassword = document.querySelector("#input-password");
 
 const btnLogin = document.querySelector("#btn-submit");
+const form = document.querySelector("form");
 
-// Form submit event handle
+const userArr = [...initialUsers];
+
+// Btn LOGIN event handler
 btnLogin.addEventListener("click", (e) => {
   const username = inputUsername.value;
   const password = inputPassword.value;
 
-  if (validate(username, password)) {
-    const currentUser = userArr.find((el) => el.username == username);
+  if (!validate(username, password)) return;
 
-    saveToStorage("CUR_USER", currentUser);
+  const currentUser = userArr.find((user) => user.username == username);
 
-    setTimeout(() => (window.location.href = "../index.html"), 300);
-  }
+  saveToStorage(CUR_USER, currentUser);
+
+  setTimeout(() => (window.location.href = "../index.html"), 300);
 });
 
-// Event handler from 'ENTER' keydown
-document.querySelector("form").addEventListener("keydown", (e) => {
+// FORM submit event handler (Enter key)
+form.addEventListener("keydown", (e) => {
   if (e.key == "Enter") {
     e.preventDefault();
+
     btnLogin.click();
   }
 });
 
 // Validate input fields
 function validate(username, password) {
-  const userAcc = new Map(Array.from(userArr).map((el) => [el.username, el.password]));
+  const userAcc = new Map(userArr.map(({ username, password }) => [username, password]));
 
-  if (!username) {
-    warning(inputUsername, "Input fiedls cannot be empty");
+  if (!username || !password) {
+    alert("Input fields cannot be empty");
+    inputUsername.focus();
     return false;
   }
 
   if (!password) {
-    warning(inputPassword, "Input fiedls cannot be empty");
+    alert("Input fields cannot be empty");
+    inputPassword.focus();
     return false;
   }
 
   if (userAcc.get(username) != password) {
-    warning(null, "Username or password maybe wrong");
+    alert("Username or password maybe wrong");
     return false;
   }
 
   return true;
-}
-
-// Annoucement
-function warning(selector, message) {
-  selector?.focus();
-  alert(message);
 }

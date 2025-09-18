@@ -7,7 +7,7 @@ const btnSubmit = document.querySelector("#btn-submit");
 
 const form = document.querySelector("form");
 
-if (!getFromStorage("CUR_USER")) window.location.href = "login.html";
+if (!getFromStorage(CUR_USER)) window.location.href = "login.html";
 
 inputPage.value = User.PAGE_SIZE;
 inputCategory.value = User.CATEGORY;
@@ -15,14 +15,14 @@ inputCategory.value = User.CATEGORY;
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
-  const [page, category] = validate();
+  const [page, category] = getData();
 
   User.CATEGORY = (category + "").toLowerCase();
   User.PAGE_SIZE = +page;
 
   alert("Success");
 
-  saveToStorage("settings", [page, category]);
+  saveToStorage(SETTING_KEY, [page, category]);
 });
 
 form.addEventListener("keydown", (e) => {
@@ -33,7 +33,7 @@ form.addEventListener("keydown", (e) => {
   }
 });
 
-function validate() {
+function getData() {
   let page = inputPage.value;
   let category = inputCategory.value;
 

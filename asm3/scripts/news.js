@@ -20,15 +20,15 @@ const btnNext = document.querySelector("#btn-next");
 //     console.error("Fetch error:", error);
 //   });
 
-// If is logged in yet, navigate to Login page
-if (!getFromStorage("CUR_USER")) window.location.href = "login.html";
+// If isn't logged in yet, navigate to LOGIN page
+if (!curUser) window.location.href = "login.html";
 
 // Hide btnPrev
 btnPrev.setAttribute("style", "display: none;");
 
 // Render initial news
 let data = [];
-User.getData(1).then(([news, maxPage]) => {
+User.getNews(1).then(([news, maxPage]) => {
   data = [...news];
 
   renderNew(data);
@@ -36,9 +36,10 @@ User.getData(1).then(([news, maxPage]) => {
 
 // Render news function
 function renderNew(news) {
+  // Clear container
   newsContainer.innerHTML = "";
 
-  Array.from(news).forEach(({ author, content, description, publishedAt, source, title, url, urlToImage }) => {
+  [...news].map(({ author, content, description, publishedAt, source, title, url, urlToImage }) => {
     const html = `
             <div class="card flex-row flex-wrap">
             <div class="card mb-3" style="">
@@ -67,38 +68,44 @@ function renderNew(news) {
   });
 }
 
-// btnNext event handler
+// Btn NEXT event handler
 btnNext.addEventListener("click", (e) => {
   e.preventDefault();
 
   const page = +pageNumber.innerText + 1;
 
+  // Show PREV button
   btnPrev.setAttribute("style", "display: block;");
 
-  // Render news
-  User.getData(page)?.then(([news, maxPage]) => {
+  User.getNews(page).then(([news, maxPage]) => {
+    // Hide NEXT button if reach max page
     if (page == maxPage) {
       btnNext.setAttribute("style", "display: none;");
     }
 
+    // Render news
     renderNew([...news]);
-    pageNumber.innerText = page;
   });
+
+  // Render page number
+  pageNumber.innerText = page;
 });
 
-// btnPrev event handler
+// Btn PREV event handler
 btnPrev.addEventListener("click", (e) => {
   e.preventDefault();
 
   const page = +pageNumber.innerText - 1;
 
+  // Show NEXT button
   btnNext.setAttribute("style", "display: block;");
 
-  if (page != 0) {
-    pageNumber.innerText = page;
-
-    // Render news
-    User.getData(page)?.then(([news, maxPage]) => renderNew([...news]));
-  }
+  // Hide PREV button if page is 1
   if (page == 1) btnPrev.setAttribute("style", "display: none;");
+
+  // Render news
+  User.getNews(page).then(([news, maxPage]) => renderNew([...news]));
+
+  // Render page number
+  pageNumber.innerText = page;
 });

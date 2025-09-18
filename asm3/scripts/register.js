@@ -7,62 +7,70 @@ const inputPassword = document.querySelector("#input-password");
 const inputPasswordConfirm = document.querySelector("#input-password-confirm");
 
 const btnSubmit = document.querySelector("#btn-submit");
+const form = document.querySelector("form");
 
-// Form submit
+const userArr = [...initialUsers];
+
+// Btn REGISTER event handler
 btnSubmit.addEventListener("click", (e) => {
   const fName = inputFirstName.value.trim();
   const lName = inputLastName.value.trim();
   const username = inputUsername.value;
   const password = inputPassword.value;
   const passwordC = inputPasswordConfirm.value;
+
   const newUser = new User(fName, lName, username, password);
 
-  if (validateUser(newUser, passwordC)) {
-    userArr.push(newUser);
+  if (!validateUser(newUser, passwordC)) return;
 
-    saveToStorage(KEY, userArr);
+  userArr.push(newUser);
 
-    setTimeout(() => (window.location.href = "login.html"), 300);
-  }
+  saveToStorage(USER_KEY, userArr);
+
+  setTimeout(() => (window.location.href = "login.html"), 300);
 });
 
-// Event handler from 'ENTER' keydown
-document.querySelector("form").addEventListener("keydown", (e) => {
+// FORM submit event handler
+form.addEventListener("keydown", (e) => {
   if (e.key == "Enter") {
     e.preventDefault();
+
     btnSubmit.click();
   }
 });
 
 // Validate inputs fields
-function validateUser(user, passwordC) {
+function validateUser({ firstName, lastName, username, password }, passwordC) {
   const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
   const passwordPattern = /^.{9,}$/;
 
-  const { firstName, lastName, username, password } = user;
+  if (!firstName || !lastName || !username || !password || !passwordC) {
+    warning("Inputs fields cannot be empty");
+    return;
+  }
 
-  if (!firstName || !namePattern.test(firstName)) {
-    warning(inputFirstName, "Invalid first name");
+  if (!namePattern.test(firstName)) {
+    warning("Invalid first name", inputFirstName);
     return false;
   }
 
-  if (!lastName || !namePattern.test(lastName)) {
-    warning(inputLastName, "Invalid last name");
+  if (!namePattern.test(lastName)) {
+    warning("Invalid last name", inputLastName);
     return false;
   }
 
-  if (!username || userArr.some((e) => e.username == username)) {
-    warning(inputUsername, "Invalid username");
+  if (userArr.find((e) => e.username == username)) {
+    warning("Invalid username", inputUsername);
     return false;
   }
 
-  if (!password || !passwordPattern.test(password)) {
-    warning(inputPassword, "Invalid password");
+  if (!passwordPattern.test(password)) {
+    warning("Invalid password", inputPassword);
     return false;
   }
 
   if (password != passwordC) {
-    warning(inputPasswordConfirm, "Confirmed password not matched");
+    warning("Confirmed password not matched", inputPasswordConfirm);
     return false;
   }
 
@@ -70,7 +78,7 @@ function validateUser(user, passwordC) {
 }
 
 // Annoucement
-function warning(selector, message) {
-  selector?.focus();
+function warning(message, selector) {
   alert(message);
+  selector?.focus();
 }

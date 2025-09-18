@@ -1,7 +1,5 @@
 "use strict";
 
-const KEY = "USER_ARRAY";
-
 const API_KEY = "2dc4e55d48ed4f8ea8f9f92662633f0f";
 
 class User {
@@ -15,16 +13,15 @@ class User {
     this.password = password;
   }
 
-  static from({ firstName, lastName, username, password }) {
-    return new User(firstName, lastName, username, password);
+  static from(o) {
+    if (!o) return null;
+    return new User(o.firstName, o.lastName, o.username, o.password);
   }
 
-  static async getData(page, query, category = User.CATEGORY, pageSize = User.PAGE_SIZE, country = "us") {
+  static async getNews(page, query, category = User.CATEGORY, pageSize = User.PAGE_SIZE, country = "us") {
     const url = `https://newsapi.org/v2/top-headlines?country=${country}&pageSize=${pageSize}&category=${category}&${
       page ? `page=${page}&` : ""
     }language=en&${query ? `q=${query}&` : ""}apiKey=${API_KEY}`;
-
-    console.log(url);
 
     try {
       const response = await fetch(url);
@@ -41,15 +38,6 @@ class User {
   }
 
   static findNews(page, query, category) {
-    return User.getData(page, query, category ?? User.CATEGORY);
+    return User.getNews(page, query, category ?? User.CATEGORY);
   }
 }
-
-// initial data
-let userArr = [
-  new User("John", "Doe", "johndoe", "password123"),
-  new User("Jane", "Smith", "janesmith", "mypassword"),
-  new User("Minh", "Nguyen", "minhnguyen", "123456"),
-  new User("Linh", "Tran", "linhtran", "linh@2024"),
-  new User("Bao", "Pham", "baopham", "bao!secure"),
-];

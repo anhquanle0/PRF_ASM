@@ -1,12 +1,8 @@
 "use strict";
 
-const TODO_KEY = "todo";
-
 const containerTodoList = document.querySelector("#todo-list");
 const inputTask = document.querySelector("#input-task");
 const btnAdd = document.querySelector("#btn-add");
-
-const { username } = getFromStorage("CUR_USER");
 
 class Todo {
   constructor(task, owner, isDone = false) {
@@ -15,16 +11,17 @@ class Todo {
     this.isDone = isDone;
   }
 
-  static from({ task, owner, isDone }) {
-    return new Todo(task, owner, isDone);
+  static from(o) {
+    if (!o) return null;
+    return new Todo(o.task, o.owner, o.isDone);
   }
 }
 
-// If is logged in yet, navigate to Login page
-if (!getFromStorage("CUR_USER")) window.location.href = "login.html";
+// If isn't logged in yet, navigate to LOGIN page
+if (!curUser) window.location.href = "login.html";
 
 // Initial data
-let todoArr = [
+let todoArr = getFromStorage(TODO_KEY) ?? [
   new Todo("Meet George", "johndoe"),
   new Todo("Buy eggs", "minhnguyen"),
   new Todo("Read a book", "linhtran"),
@@ -34,12 +31,8 @@ let todoArr = [
   new Todo("Read a book", "minhnguyen"),
   new Todo("Organize office", "quanle"),
 ];
-
-if (!getFromStorage(TODO_KEY)) {
-  saveToStorage(TODO_KEY, todoArr);
-} else {
-  todoArr = [...getFromStorage(TODO_KEY)]?.map((el) => Todo.from(el));
-}
+todoArr = [...todoArr].map((el) => Todo.from(el));
+saveToStorage(TODO_KEY, todoArr);
 
 // Render curUser's todo list
 renderTodoList(getMyList());
@@ -48,13 +41,21 @@ renderTodoList(getMyList());
 btnAdd.addEventListener("click", (e) => {
   e.preventDefault();
 
+  // Retrieve data from inputs fieldd
   const task = inputTask.value;
   if (!task) {
-    console.log("Enter your task name");
+    alert("Enter your task name");
     return;
   }
 
-  const newTask = new Todo(task, username);
+  const existedTask = [...getMyList()].find((el) => el.task.toLowerCase() == task.toLowerCase());
+
+  if (existedTask) {
+    alert("Task existed! PLease try again");
+    return;
+  }
+
+  const newTask = new Todo(task, curUser.username);
 
   todoArr.push(newTask);
 
@@ -65,8 +66,8 @@ btnAdd.addEventListener("click", (e) => {
   inputTask.value = "";
 });
 
-// Event handler from 'ENTER' keydown
-inputTask.addEventListener("keydown", (e) => {
+// FORM submit event handler
+document.querySelector(".todo-list-header").addEventListener("keydown", (e) => {
   if (e.key == "Enter") {
     e.preventDefault();
 
@@ -76,9 +77,10 @@ inputTask.addEventListener("keydown", (e) => {
 
 // Render list function
 function renderTodoList(list) {
+  // Clear container
   containerTodoList.innerHTML = "";
 
-  [...list]?.map(({ task, isDone }) => {
+  [...list].map(({ task, isDone }) => {
     const html = `
         <li class="${isDone ? "checked" : ""}">${task}<span class="close">×</span></li>
     `;
@@ -102,7 +104,7 @@ containerTodoList.addEventListener("click", (e) => {
   }
 });
 
-// Remove taks event handler
+// REMOVE taks event handler
 containerTodoList.addEventListener("click", (e) => {
   if (e.target && e.target.closest(".close")) {
     const [i, { task, owner, isDone }] = findTodo(e.target);
@@ -116,21 +118,21 @@ containerTodoList.addEventListener("click", (e) => {
 });
 
 // Find task & its index
-function findTodo(target) {
-  const todo = target?.closest("li");
+function findTodo(eventTarget) {
+  const todo = eventTarget?.closest("li");
 
-  const existedTask = Array.from(todo?.childNodes)
+  const existedTask = Array.from(todo.childNodes)
     .filter((node) => node.nodeType === Node.TEXT_NODE)
     .map((node) => node.textContent.trim())
     .join("");
 
-  const i = todoArr.findIndex(({ owner, task }) => owner == username && task == existedTask);
-  const existedTodo = todoArr.find(({ owner, task }) => owner == username && task == existedTask);
+  const i = todoArr.findIndex(({ owner, task }) => owner == curUser?.username && task == existedTask);
+  const existedTodo = todoArr.find(({ owner, task }) => owner == curUser?.username && task == existedTask);
 
   return [i, existedTodo];
 }
 
 // Get curUser todo list
 function getMyList() {
-  return todoArr.filter(({ owner }) => owner == username);
+  return todoArr.filter(({ owner }) => owner == curUser?.username);
 }

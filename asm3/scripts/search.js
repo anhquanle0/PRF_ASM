@@ -15,7 +15,7 @@ let data = [];
 let query;
 
 // If is logged in yet, navigate to Login page
-if (!getFromStorage("CUR_USER")) window.location.href = "login.html";
+if (!getFromStorage(CUR_USER)) window.location.href = "login.html";
 
 // Hide btnPrev
 btnPrev.setAttribute("style", "display: none;");
@@ -27,7 +27,7 @@ btnSubmit.addEventListener("click", (e) => {
   query = (inputQuery.value + "").toLowerCase();
 
   if (!query) {
-    console.log("Search key cannot be empty");
+    alert("Search key cannot be empty");
     return;
   }
 
@@ -35,6 +35,12 @@ btnSubmit.addEventListener("click", (e) => {
   inputQuery.value = "";
 
   User.findNews(1, query).then(([news, maxPage]) => {
+    if (maxPage == 1) {
+      btnNext.setAttribute("style", "display: none;");
+    } else {
+      btnNext.setAttribute("style", "display: block;");
+    }
+
     data = [...news];
     if (data.length == 0) {
       newsContainer.innerHTML = `
@@ -55,9 +61,10 @@ form.addEventListener("keydown", (e) => {
 
 // Render news function
 function renderNew(news) {
+  // Clear container
   newsContainer.innerHTML = "";
 
-  Array.from(news).forEach(({ author, content, description, publishedAt, source, title, url, urlToImage }) => {
+  [...news].map(({ author, content, description, publishedAt, source, title, url, urlToImage }) => {
     const html = `
             <div class="card flex-row flex-wrap">
             <div class="card mb-3" style="">
@@ -97,17 +104,22 @@ btnNext.addEventListener("click", (e) => {
     return;
   }
 
+  // Show PREV button
   btnPrev.setAttribute("style", "display: block;");
 
   // Render news
-  User.findNews(page, query)?.then(([news, maxPage]) => {
+  User.findNews(page, query).then(([news, maxPage]) => {
+    // Hide NEXT button if reach max page
     if (page == maxPage) {
       btnNext.setAttribute("style", "display: none;");
     }
 
+    // Render news
     renderNew([...news]);
-    pageNumber.innerText = page;
   });
+
+  // Render page number
+  pageNumber.innerText = page;
 
   goToHead();
 });
@@ -118,20 +130,22 @@ btnPrev.addEventListener("click", (e) => {
 
   const page = +pageNumber.innerText - 1;
 
-  if (!query) {
-    console.log("Search key cannot be empty");
-    return;
-  }
+  // if (!query) {
+  //   console.log("Search key cannot be empty");
+  //   return;
+  // }
 
+  // Show NEXT button
   btnNext.setAttribute("style", "display: block;");
 
-  if (page != 0) {
-    pageNumber.innerText = page;
-
-    // Render news
-    User.findNews(page, query)?.then(([news, maxPage]) => renderNew([...news]));
-  }
+  // Hide PREV button if page is 1
   if (page == 1) btnPrev.setAttribute("style", "display: none;");
+
+  // Render news
+  User.findNews(page, query).then(([news, maxPage]) => renderNew([...news]));
+
+  // Render page number
+  pageNumber.innerText = page;
 
   goToHead();
 });
