@@ -103,8 +103,8 @@ function renderBreed(type) {
 
   const breeds = [...getFromStorage(BREED_KEY)].filter((el) => el.type == type);
 
-  breeds?.forEach((el) => {
-    inputBreed.innerHTML += `<option>${el.breed}</option>`;
+  breeds.map(({ breed }) => {
+    inputBreed.innerHTML += `<option>${breed}</option>`;
   });
 }
 

@@ -18,28 +18,28 @@ btnSubmit.addEventListener("click", (e) => {
 
   const newBreed = new BreedData(breed, type);
 
-  if (validate(newBreed)) {
-    const existedBreed = breedArr.find((el) => el.breed == breed);
-    if (existedBreed?.type == type) {
-      showToast("This breed is existed");
-      return;
-    }
+  if (!validate(newBreed)) return;
 
-    // update data
-    breedArr.push(newBreed);
-
-    // render modified list
-    renderBreedTable(breedArr);
-
-    // update storage
-    saveToStorage(BREED_KEY, breedArr);
-
-    // hide form
-    document.querySelector("form").reset();
-
-    // annoucement
-    showToast("New breed added!", "success");
+  const existedBreed = breedArr.find((el) => el.breed == breed);
+  if (existedBreed?.type == type) {
+    showToast("This breed is existed");
+    return;
   }
+
+  // update data
+  breedArr.push(newBreed);
+
+  // render modified list
+  renderBreedTable(breedArr);
+
+  // update storage
+  saveToStorage(BREED_KEY, breedArr);
+
+  // hide form
+  document.querySelector("form").reset();
+
+  // annoucement
+  showToast("New breed added!", "success");
 });
 
 // Form submit event handler
@@ -52,13 +52,13 @@ document.querySelector("form").addEventListener("keydown", (e) => {
 });
 
 // Validate input fields function
-function validate(breedObj) {
-  if (!breedObj.breed) {
+function validate({ breed, type }) {
+  if (breed) {
     showToast("Please enter breed");
     return false;
   }
 
-  if (breedObj.type == "Select Type") {
+  if (type == "Select Type") {
     showToast("Please select type");
     return false;
   }

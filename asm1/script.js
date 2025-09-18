@@ -83,15 +83,16 @@ btnSubmit.addEventListener("click", (e) => {
   const newPet = new PetData(id, name, age, type, weight, lenght, breed, color, vaccinated, dewormed, sterilized, 0);
 
   // 3. validate data
-  if (validate(newPet)) {
-    petArr.push(newPet);
+  if (!validate(newPet)) return;
 
-    // 4. Render pet list
-    renderTableData(petArr);
+  // 3.1 Update data
+  petArr.push(newPet);
 
-    // 5. Clear input fields
-    clearInput();
-  }
+  // 4. Render pet list
+  renderTableData(petArr);
+
+  // 5. Clear input fields
+  clearInput();
 });
 
 // Form submit event handler
@@ -173,9 +174,9 @@ function findPet(id) {
 }
 
 // Warning message and focus on its input field
-function warning(messages, inputSelector) {
+function warning(messages, selector) {
   showAlert(messages);
-  inputSelector?.focus();
+  selector?.focus();
 }
 
 // Display info list function

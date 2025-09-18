@@ -87,7 +87,7 @@ async function importFromFile(file) {
     merged.set(p.id, p);
   });
 
-  saveToStorage(PET_KEY, merged);
+  saveToStorage(PET_KEY, merged.values());
 
   return { success: importedPets.length, duplicated: duplicated.length };
 }

@@ -48,22 +48,22 @@ btnSubmit.addEventListener("click", (e) => {
   const newPet = new PetData(id, name, age, type, weight, lenght, breed, color, vaccinated, dewormed, sterilized);
 
   // validate data
-  if (validate(newPet)) {
-    // updateData
-    petMap.set(newPet.id, newPet);
+  if (!validate(newPet)) return;
 
-    // display new pet
-    renderTableData(petMap.values());
+  // updateData
+  petMap.set(newPet.id, newPet);
 
-    // update localStorage
-    saveToStorage(PET_KEY, petMap);
+  // display new pet
+  renderTableData(petMap.values());
 
-    // clear input fields
-    clearInput();
+  // update localStorage
+  saveToStorage(PET_KEY, petMap.values());
 
-    // annoucement
-    showToast("New pet added!", "success");
-  }
+  // clear input fields
+  clearInput();
+
+  // annoucement
+  showToast("New pet added!", "success");
 });
 
 // Form submit event handler
@@ -202,7 +202,7 @@ containerPetsInfo.addEventListener("click", (e) => {
       row.remove();
 
       // update localStorage
-      saveToStorage(PET_KEY, petMap);
+      saveToStorage(PET_KEY, petMap.values());
 
       // annoucement
       showToast("Pet removed!", "success");
@@ -240,8 +240,8 @@ function renderBreed(type) {
 
   const breeds = [...getFromStorage(BREED_KEY)].filter((el) => el.type == type);
 
-  breeds?.forEach((el) => {
-    inputBreed.innerHTML += `<option>${el.breed}</option>`;
+  breeds.map(({ breed }) => {
+    inputBreed.innerHTML += `<option>${breed}</option>`;
   });
 }
 // Annoucement
