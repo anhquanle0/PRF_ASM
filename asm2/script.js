@@ -5,7 +5,6 @@ const containerPetsInfo = document.querySelector("#tbody");
 
 const btnSubmit = document.querySelector("#submit-btn");
 const btnHealthy = document.querySelector("#healthy-btn");
-const btnBMI = document.querySelector("#bmi-btn");
 
 const inputId = document.querySelector("#input-id");
 const inputName = document.querySelector("#input-name");
@@ -13,7 +12,7 @@ const inputAge = document.querySelector("#input-age");
 const inputType = document.querySelector("#input-type");
 const inputWeight = document.querySelector("#input-weight");
 const inputLength = document.querySelector("#input-length");
-// const inputBreed = document.querySelector("#input-breed");
+const inputBreed = document.querySelector("#input-breed");
 const inputColor = document.querySelector("#input-color-1");
 const inputVaccinated = document.querySelector("#input-vaccinated");
 const inputDewormed = document.querySelector("#input-dewormed");
@@ -23,14 +22,17 @@ const inputSterilized = document.querySelector("#input-sterilized");
 ////////////////////////////////////
 ////////////////////////////////////
 
-const petArr = new Map(initialPets);
-displayPetInfo(petArr);
+const petMap = new Map(
+  initialPets.map((pet) => {
+    return [pet.id, pet];
+  })
+);
+renderTableData(petMap.values());
 
 // Submit form
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
-  // retrieve data
   const id = inputId.value;
   const name = inputName.value;
   const age = inputAge.value;
@@ -43,21 +45,33 @@ btnSubmit.addEventListener("click", (e) => {
   const dewormed = inputDewormed.checked;
   const sterilized = inputSterilized.checked;
 
-  const newPet = new PetData(id.toUpperCase(), name, age, type, weight, lenght, breed, color, vaccinated, dewormed, sterilized);
+  const newPet = new PetData(id, name, age, type, weight, lenght, breed, color, vaccinated, dewormed, sterilized);
 
   // validate data
   if (validate(newPet)) {
     // updateData
-    petArr.set(newPet.id, newPet);
+    petMap.set(newPet.id, newPet);
 
     // display new pet
-    displayPetInfo(petArr);
+    renderTableData(petMap.values());
 
     // update localStorage
-    saveToStorage("pet", petArr);
+    saveToStorage(PET_KEY, petMap);
 
     // clear input fields
     clearInput();
+
+    // annoucement
+    showToast("New pet added!", "success");
+  }
+});
+
+// Form submit event handler
+form.addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+
+    btnSubmit.click();
   }
 });
 
@@ -66,63 +80,55 @@ function validate(pet) {
   const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
   const numberPattern = /^\d+$/;
 
+  const { id, name, age, type, weight, length, breed } = pet;
+
   // Type-safe
   if (!pet instanceof PetData) return false;
 
-  // Unique ID
-  if (!pet.id) {
-    showToast("Vui lòng nhập ID");
-    inputId.focus();
+  if (!id || !name || !age || !weight || !length) {
+    warning("Inputs cannot be empty");
     return false;
-  } else if (Array.from(petArr.keys()).includes(pet.id)) {
-    showToast("ID đã tồn tại");
-    inputId.focus();
+  }
+
+  // Unique ID
+  if (petMap.get(id)) {
+    warning("ID must be unique!", inputId);
     return false;
   }
 
   // Name
-  if (!pet.name) {
-    showToast("Tên không được để trống");
-    inputName.focus();
+  if (!namePattern.test(name)) {
+    warning("Name cannot be included number!", inputName);
     return false;
-  } else {
-    if (!namePattern.test(pet.name)) {
-      showToast("Tên không được tồn tại chữ số");
-      inputName.focus();
-      return false;
-    }
   }
 
   // Age
-  if (!numberPattern.test(pet.age) || pet.age <= 0 || pet.age > 50) {
-    showToast("Tuổi không phù hợp");
-    inputAge.focus();
+  if (!numberPattern.test(age) || age < 1 || age > 15) {
+    warning("Age must be between 1 and 15!", inputAge);
     return false;
   }
 
   // Type
-  if (pet.type == "Select Type") {
-    showToast("Hãy chọn loại pet");
+  if (type == "Select Type") {
+    warning("Please select Type!", inputType);
     return false;
   }
 
   // Weight
-  if (!numberPattern.test(pet.weight) || pet.weight <= 5 || pet.weight > 100) {
-    showToast("Hãy điền số cân nặng phù hợp");
-    inputWeight.focus();
+  if (!numberPattern.test(weight) || weight < 1 || weight > 15) {
+    warning("Weight must be between 1 and 15!", inputWeight);
     return false;
   }
 
   // Length
-  if (!numberPattern.test(pet.length) || pet.length <= 10 || pet.length > 200) {
-    showToast("Hãy điền chiều dài phù hợp");
-    inputLength.focus();
+  if (!numberPattern.test(length) || length < 1 || length > 100) {
+    warning("Length must be between 1 and 100!", inputLength);
     return false;
   }
 
   // Breed
-  if (pet.breed == "Select Breed") {
-    showToast("Hãy chọn thức ăn cho pet");
+  if (breed == "Select Breed") {
+    warning("Please select Breed!", inputBreed);
     return false;
   }
 
@@ -130,39 +136,43 @@ function validate(pet) {
 }
 
 // Display info list
-function displayPetInfo(list) {
+function renderTableData(pets) {
   // Clear container
   containerPetsInfo.innerHTML = "";
 
-  (list instanceof Map ? Array.from(list.values()) : list).forEach((pet) => {
-    const name = pet.name ? pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "" : "Unnamed";
-    const dateAdded = new Date(pet.dateAdded).toLocaleDateString("en-US");
+  [...pets].forEach((pet) => {
+    const { id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded } = pet;
+    const petName = name[0].toUpperCase() + name.slice(1).toLowerCase() + "";
+
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    }).format(new Date(dateAdded));
 
     const html = `
 		<tr>
-			<th scope="row">${pet.id}</th>
-			<td>${name}</td>
-			<td>${pet.age}</td>
-			<td>${pet.type}</td>
-			<td>${pet.weight ? pet.weight + "kg" : undefined}</td>
-			<td>${pet.length ? pet.length + "cm" : undefined}</td>
-			<td>${pet.breed}</td>
+			<th scope="row">${id}</th>
+			<td>${petName}</td>
+			<td>${age}</td>
+			<td>${type}</td>
+			<td>${weight} kg</td>
+			<td>${length} cm</td>
+			<td>${breed}</td>
 			<td>
-			  <i class="bi bi-square-fill" style="color: ${pet.color}"></i>
+			  <i class="bi bi-square-fill" style="color: ${color}"></i>
 			</td>
-			<td><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
-			<td><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
-			<td><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>			
-			<td>${dateAdded}</td>
+			<td><i class="bi bi-${vaccinated ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${dewormed ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${sterilized ? "check" : "x"}-circle-fill"></i></td>
+			<td>${formattedDate}</td>
 			<td>
         <button type="button" class="btn btn-danger">Delete</button>
 			</td>
 		</tr>  
   `;
 
-    // containerPetsInfo.insertAdjacentHTML("beforeend", html);
-
-    containerPetsInfo.innerHTML += html;
+    containerPetsInfo.insertAdjacentHTML("beforeend", html);
   });
 }
 
@@ -181,18 +191,21 @@ function clearInput() {
 containerPetsInfo.addEventListener("click", (e) => {
   e.preventDefault();
 
-  if (e.target && e.target.closest(".btn-danger")) {
+  if (e.target && e.target.matches("button")) {
     if (confirm("Are you sure?")) {
       const row = e.target.closest("tr");
       const id = row.querySelector("th").textContent;
       // delete from Map
-      petArr.delete(id);
+      petMap.delete(id);
 
       // remove record
       row.remove();
 
       // update localStorage
-      saveToStorage("pet", petArr);
+      saveToStorage(PET_KEY, petMap);
+
+      // annoucement
+      showToast("Pet removed!", "success");
     }
   }
 });
@@ -207,66 +220,32 @@ btnHealthy.addEventListener("click", (e) => {
 
   if (btnHealthy.classList.contains("show-all")) {
     btnHealthy.textContent = " Show All Pet";
-    displayPetInfo(
-      Array.from(petArr.values()).filter((v) => {
-        if (v.vaccinated && v.dewormed && v.sterilized) return v;
-      })
-    );
+
+    const healthyPets = [...petMap.values()].filter((v) => v.vaccinated && v.dewormed && v.sterilized);
+    renderTableData(healthyPets);
   } else {
     btnHealthy.textContent = " Show Healthy Pet";
-    displayPetInfo(petArr);
+    renderTableData(petMap.values());
   }
 });
 
 ////////////////////////////////////
 ////////////////////////////////////
 ////////////////////////////////////
-// ASM02
+// ASM2
 
-// 1. Sidebar toggle active
-// sidebar.addEventListener("click", (e) => {
-//   e.preventDefault();
+// Render breed list based on selected type
+function renderBreed(type) {
+  inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
 
-//   if (e.target && e.target.closest("li")) {
-//     const href = e.target.closest("a")?.href;
-//     window.location.href = href;
-//   } else {
-//     sidebar.classList.toggle("active");
-//   }
-// });
+  const breeds = [...getFromStorage(BREED_KEY)].filter((el) => el.type == type);
 
-// 2. Localstorage
-// function saveToStorage(k, v) {
-//   if (v instanceof Map) {
-//     localStorage.setItem(k, JSON.stringify(Array.from(v.values())));
-//   } else {
-//     localStorage.setItem(k, JSON.stringify(v));
-//   }
-// }
-
-// function getFromStorage(k) {
-//   return JSON.parse(localStorage.getItem(k));
-// }
-
-// 4. Breed
-// inputType.addEventListener("change", (e) => {
-//   inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
-
-//   const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == inputType.value);
-
-//   breeds.forEach((el) => {
-//     inputBreed.innerHTML += `<option>${el.breed}</option>`;
-//   });
-// });
-
-// function renderBreed(type) {
-//   inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
-
-//   const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == type);
-
-//   breeds.forEach((el) => {
-//     const option = document.createElement("option");
-//     option.innerHTML = el.breed;
-//     inputBreed.appendChild(option);
-//   });
-// }
+  breeds?.forEach((el) => {
+    inputBreed.innerHTML += `<option>${el.breed}</option>`;
+  });
+}
+// Annoucement
+function warning(message, selector) {
+  selector?.focus();
+  showToast(message);
+}

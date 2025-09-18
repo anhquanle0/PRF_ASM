@@ -3,32 +3,55 @@
 const containerBreedsInfo = document.querySelector("#tbody");
 const btnSubmit = document.querySelector("#submit-btn");
 
-// const inputBreed = document.querySelector("#input-breed");
-// const inputType = document.querySelector("#input-type");
+const inputBreed = document.querySelector("#input-breed");
+const inputType = document.querySelector("#input-type");
 
-let breedArr = initialBreeds ?? [];
+// Render data from localStorage
+let breedArr = [...initialBreeds];
 renderBreedTable(breedArr);
 
-// 1. Event handler for SUBMIT btn
+// Event handler for SUBMIT btn
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
+  const breed = inputBreed.value;
+  const type = inputType.value;
 
-  const newBreed = new BreedData(inputBreed.value, inputType.value);
+  const newBreed = new BreedData(breed, type);
 
   if (validate(newBreed)) {
-    breedArr = [...breedArr, newBreed];
+    const existedBreed = breedArr.find((el) => el.breed == breed);
+    if (existedBreed?.type == type) {
+      showToast("This breed is existed");
+      return;
+    }
 
+    // update data
+    breedArr.push(newBreed);
+
+    // render modified list
     renderBreedTable(breedArr);
 
-    saveToStorage("breed", breedArr);
+    // update storage
+    saveToStorage(BREED_KEY, breedArr);
 
-    showToast("Breed added", "success");
-  } else {
-    showToast("This breed is existed");
+    // hide form
+    document.querySelector("form").reset();
+
+    // annoucement
+    showToast("New breed added!", "success");
   }
 });
 
-// 2. Validate input fields functionality
+// Form submit event handler
+document.querySelector("form").addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+
+    btnSubmit.click();
+  }
+});
+
+// Validate input fields function
 function validate(breedObj) {
   if (!breedObj.breed) {
     showToast("Please enter breed");
@@ -39,46 +62,54 @@ function validate(breedObj) {
     showToast("Please select type");
     return false;
   }
+
+  return true;
 }
 
-const compare = (a, b) => a.toLowerCase().trim() === b.toLowerCase().trim();
-
-// 3. Show breed list functionality
-function renderBreedTable(list) {
+// Show breed list function
+function renderBreedTable(pets) {
+  // Clear container
   containerBreedsInfo.innerHTML = "";
 
-  Array.from(list)?.forEach((v, i) => {
+  [...pets].forEach(({ breed, type }, i) => {
     const html = `
     <tr>
       <th scope="row">${i + 1}</th>
-      <td>${v.breed}</td>
-      <td>${v.type}</td>
+      <td>${breed}</td>
+      <td>${type}</td>
       <td>
         <button type="button" class="btn btn-danger">Delete</button>
       </td>
     </tr>  
   `;
 
-    containerBreedsInfo.innerHTML += html;
+    containerBreedsInfo.insertAdjacentHTML("beforeend", html);
   });
 }
 
-// 4. Event handler for DELETE btn
+// Event handler for DELETE btn
 containerBreedsInfo.addEventListener("click", (e) => {
   e.preventDefault();
 
-  if (e.target && e.target.closest(".btn-danger")) {
+  if (e.target && e.target.matches("button")) {
     if (confirm("Are you sure?")) {
       const row = e.target.closest("tr");
       const id = row.querySelector("th").textContent;
 
+      // remove row
       row.remove();
 
+      // update data
       breedArr.splice(id - 1, 1);
 
-      saveToStorage("breed", breedArr);
+      // update storage
+      saveToStorage(BREED_KEY, breedArr);
 
+      // render modified list
       renderBreedTable(breedArr);
+
+      // annoucement
+      showToast("Breed removed!", "success");
     }
   }
 });

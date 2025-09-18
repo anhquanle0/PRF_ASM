@@ -18,8 +18,7 @@
 const inputFile = document.querySelector("#input-file");
 const btnImport = document.querySelector("#import-btn");
 
-let dataFromStorage = [];
-Array.from(getFromStorage("pet")).map((pet) => dataFromStorage.push(pet));
+const dataFromStorage = [...initialPets];
 
 btnImport.addEventListener("click", (e) => {
   try {
@@ -37,6 +36,8 @@ btnImport.addEventListener("click", (e) => {
     importFromFile(file).then(({ success, duplicated }) => {
       showToast(`Import thành công ${success} bản ghi (trùng ${duplicated})`, "success");
     });
+
+    setTimeout(() => (window.location.href = "../index.html"), 3500);
   } catch (err) {
     console.error(err);
     showToast(`Import thất bại: ${err.message || err}`);
@@ -46,11 +47,14 @@ btnImport.addEventListener("click", (e) => {
   }
 });
 
-function mergeById(oldArr, newArr) {
-  const map = new Map(oldArr.map((p) => [p.id, p]));
-  for (const p of newArr) map.set(p.id, p);
-  return Array.from(map.values());
-}
+// Form submit event handler
+document.querySelector("form").addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+
+    btnImport.click();
+  }
+});
 
 async function importFromFile(file) {
   const text = await file.text();
@@ -69,27 +73,21 @@ async function importFromFile(file) {
       }
     }
 
-    // File mẫu có "date" (ISO). Nếu có -> truyền làm tham số 12 (dateAdded)
-    const dateAdded = "date" in o && o.date != null && String(o.date).trim() !== "" ? o.date : null;
+    const dateAdded = "dateAdded" in o && o.dateAdded && String(o.dateAdded).trim() !== "" ? o.dateAdded : Date.now();
 
-    if (dateAdded) {
-      return new PetData(o.id, o.name, o.age, o.type, o.weight, o.length, o.breed, o.color, o.vaccinated, o.dewormed, o.sterilized, dateAdded);
-    } else {
-      // Không có date -> để constructor tự set hôm nay
-      return new PetData(o.id, o.name, o.age, o.type, o.weight, o.length, o.breed, o.color, o.vaccinated, o.dewormed, o.sterilized);
-    }
+    return new PetData(o.id, o.name, o.age, o.type, o.weight, o.length, o.breed, o.color, o.vaccinated, o.dewormed, o.sterilized, dateAdded);
   });
 
   // Merge data
-  let merged = new Map();
-  dataFromStorage.forEach((el) => merged.set(el.id, el));
+  let merged = new Map(dataFromStorage.map((p) => [p.id, p]));
 
   let duplicated = [];
-  importedPets.forEach((v) => {
-    if (merged.set(v.id, v)) duplicated.push(v);
+  importedPets.map((p) => {
+    if (merged.get(p.id)) duplicated.push(p);
+    merged.set(p.id, p);
   });
 
-  saveToStorage("pet", merged);
+  saveToStorage(PET_KEY, merged);
 
   return { success: importedPets.length, duplicated: duplicated.length };
 }

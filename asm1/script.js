@@ -94,6 +94,15 @@ btnSubmit.addEventListener("click", (e) => {
   }
 });
 
+// Form submit event handler
+form.addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+
+    btnSubmit.click();
+  }
+});
+
 // Validate data function
 function validate(pet) {
   const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
@@ -171,14 +180,14 @@ function warning(messages, inputSelector) {
 
 // Display info list function
 function renderTableData(pets) {
+  // Clear container
   containerPetsInfo.innerHTML = "";
 
   [...pets].forEach((pet) => {
-    console.log(pet);
     const { id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded } = pet;
     const petName = name[0].toUpperCase() + name.slice(1).toLowerCase() + "";
 
-    const formattedDate = new Intl.DateTimeFormat("en-GB", {
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",

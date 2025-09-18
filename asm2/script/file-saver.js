@@ -186,20 +186,18 @@ document.querySelector("#export-btn").addEventListener("click", (e) => {
   e.preventDefault();
 
   const data = [];
-  getFromStorage("pet").forEach((e) => {
-    const pet = Object.assign(new PetData(), e);
-    data.push(pet);
-  });
+  [...getFromStorage(PET_KEY)].map((el) => data.push(PetData.from(el)));
 
   // exportToJsonFile("data.json", data);
-  exportDataWithFileSaver("data.json", data);
+  exportDataWithFileSaver(DOWNLOAD_FILE_NAME, data);
 });
 
+///////////////////////////////////////////////
 // Note: My functionality
 function exportToJsonFile(filename, data) {
   // Convert data to JSON and parse in Blob
   const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const blob = new Blob(["\uFEFF" + json], { type: "application/json;charset=utf-8" });
 
   const url = URL.createObjectURL(blob);
 
@@ -215,9 +213,6 @@ function exportToJsonFile(filename, data) {
 }
 
 ///////////////////////////////////////////////
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-
 // Note: provided solution
 function exportDataWithFileSaver(filename, data) {
   const jsonStr = JSON.stringify(data, null, 2);

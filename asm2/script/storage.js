@@ -15,17 +15,16 @@ function getFromStorage(k) {
 ////////////////////////////////////
 ////////////////////////////////////
 ////////////////////////////////////
+const [SIDEBAR_KEY, BREED_KEY, PET_KEY, DOWNLOAD_FILE_NAME] = ["sidebar", "breed", "pet", "data.json"];
 
 const sidebar = document.querySelector("#sidebar");
-if (localStorage.getItem("sidebar")) {
-  if (getFromStorage("sidebar")) {
-    sidebar.classList.add("active");
-  } else {
-    sidebar.classList.remove("active");
-  }
+if (getFromStorage(SIDEBAR_KEY)) {
+  sidebar.classList.add("active");
+} else {
+  sidebar.classList.remove("active");
 }
 
-// Sidebar active toggle
+// Sidebar active toggle (include in storage.js file for all page can do it)
 sidebar.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -35,12 +34,74 @@ sidebar.addEventListener("click", (e) => {
   } else {
     sidebar.classList.toggle("active");
     const isActived = sidebar.classList.contains("active");
-    saveToStorage("sidebar", isActived);
+    saveToStorage(SIDEBAR_KEY, isActived);
   }
 });
 
-const inputBreed = document.querySelector("#input-breed");
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
+// Init data and sort
+class PetData {
+  constructor(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded) {
+    this.id = id.toUpperCase();
+    this.name = name;
+    this.age = age;
+    this.type = type;
+    this.weight = weight;
+    this.length = length;
+    this.breed = breed;
+    this.color = color;
+    this.vaccinated = vaccinated;
+    this.dewormed = dewormed;
+    this.sterilized = sterilized;
+    this.dateAdded = dateAdded || Date.now();
+  }
 
+  static from({ id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded }) {
+    return new PetData(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded);
+  }
+}
+
+let initialPets = getFromStorage(PET_KEY) ?? [
+  new PetData("P001", "Dober Mix", 3, "Dog", 12, 87, "Doberman Pinscher", "#e08f8f", true, true, true, "2022-03-03T17:00:00.000Z"),
+  new PetData("P002", "Charlie Tux", 4, "Cat", 4, 65, "Tabby", "#8cee9c", true, false, false, "2022-03-03T17:00:00.000Z"),
+  new PetData("P003", "Sweetie Pie", 3, "Dog", 6, 45, "Husky", "#ff1414", false, false, true, "2022-03-03T17:00:00.000Z"),
+  new PetData("P004", "Chocolate And Kitten", 4, "Cat", 6, 87, "Mixed Breed", "#e9e22b", false, false, false, "2022-03-03T17:00:00.000Z"),
+  new PetData("P005", "Symph", 6, "Dog", 8, 77, "Doberman Pinscher", "#46b4a7", true, true, true, "2022-03-03T17:00:00.000Z"),
+];
+initialPets = [...initialPets].sort((a, b) => a.id.localeCompare(b.id));
+saveToStorage(PET_KEY, initialPets);
+
+class BreedData {
+  constructor(breed, type) {
+    this.breed = breed;
+    this.type = type;
+  }
+
+  static from({ breed, type }) {
+    return new BreedData(breed, type);
+  }
+}
+
+let initialBreeds = getFromStorage(BREED_KEY) ?? [
+  new BreedData("Tabby", "Cat"),
+  new BreedData("Mixed Breed", "Cat"),
+  new BreedData("Mixed Breed", "Dog"),
+  new BreedData("Husky", "Dog"),
+  new BreedData("Domestic Short Hair", "Cat"),
+  new BreedData("Doberman Pinscher", "Dog"),
+];
+initialBreeds = [...initialBreeds].sort((a, b) => {
+  const typeCompare = a.type.localeCompare(b.type);
+  if (typeCompare !== 0) return typeCompare;
+  return a.breed.localeCompare(b.breed);
+});
+saveToStorage(BREED_KEY, initialBreeds);
+
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
 // Utils
 (function () {
   const STYLE_ID = "toastify-vanilla-style";
@@ -318,108 +379,3 @@ const inputBreed = document.querySelector("#input-breed");
 //     el.addEventListener("transitionend", () => el.remove(), { once: true });
 //   }, 3000);
 // }
-
-// Sidebar active toggle
-
-if (localStorage.getItem("sidebar")) {
-  if (getFromStorage("sidebar")) {
-    sidebar.classList.add("active");
-  } else {
-    sidebar.classList.remove("active");
-  }
-}
-
-// Show breeds based on selected type
-function renderBreed(type) {
-  inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
-
-  const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == type);
-
-  breeds?.forEach((el) => {
-    inputBreed.innerHTML += `<option>${el.breed}</option>`;
-  });
-}
-
-function sortBreed(arr) {
-  if (!Array.isArray(arr)) return;
-
-  const valid = arr.every((el) => el instanceof BreedData);
-  if (!valid) return;
-
-  arr.sort((a, b) => {
-    const typeCompare = a.type.localeCompare(b.type);
-    if (typeCompare !== 0) return typeCompare;
-    return a.breed.localeCompare(b.breed);
-  });
-}
-
-////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////////
-// Retrieve data
-class PetData {
-  constructor(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded) {
-    this.id = id.toUpperCase();
-    this.name = name;
-    this.age = age;
-    this.type = type;
-    this.weight = weight;
-    this.length = length;
-    this.breed = breed;
-    this.color = color;
-    this.vaccinated = vaccinated;
-    this.dewormed = dewormed;
-    this.sterilized = sterilized;
-    this.dateAdded = new Date(dateAdded || Date.now());
-  }
-
-  static from({ id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded }) {
-    return new PetData(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded);
-  }
-}
-
-let initialPets = new Map();
-if (!getFromStorage("pet")) {
-  addPet(new PetData("P001", "Dober Mix", 3, "Dog", 12, 87, "Doberman Pinscher", "#e08f8f", true, true, true, "2022-03-03T17:00:00.000Z"));
-  addPet(new PetData("P002", "Charlie Tux", 4, "Cat", 4, 65, "Tabby", "#8cee9c", true, false, false, "2022-03-03T17:00:00.000Z"));
-  addPet(new PetData("P003", "Sweetie Pie", 3, "Dog", 6, 45, "Husky", "#ff1414", false, false, true, "2022-03-03T17:00:00.000Z"));
-  addPet(new PetData("P004", "Chocolate And Kitten", 4, "Cat", 6, 87, "Mixed Breed", "#e9e22b", false, false, false, "2022-03-03T17:00:00.000Z"));
-  addPet(new PetData("P005", "Symph", 6, "Dog", 8, 77, "Doberman Pinscher", "#46b4a7", true, true, true, "2022-03-03T17:00:00.000Z"));
-
-  saveToStorage("pet", initialPets);
-} else {
-  getFromStorage("pet").forEach((el) => addPet(PetData.from(el)));
-}
-
-function addPet(pet) {
-  initialPets.set(pet.id, pet);
-}
-
-class BreedData {
-  constructor(breed, type) {
-    this.breed = breed;
-    this.type = type;
-  }
-
-  static from(o) {
-    return new BreedData(o.breed, o.type);
-  }
-}
-
-let initialBreeds;
-if (!getFromStorage("breed")) {
-  initialBreeds = [
-    new BreedData("Tabby", "Cat"),
-    new BreedData("Mixed Breed", "Cat"),
-    new BreedData("Mixed Breed", "Dog"),
-    new BreedData("Husky", "Dog"),
-    new BreedData("Domestic Short Hair", "Cat"),
-    new BreedData("Doberman Pinscher", "Dog"),
-  ];
-
-  saveToStorage("breed", initialBreeds);
-} else {
-  initialBreeds = getFromStorage("breed").map((e) => BreedData.from(e));
-}
-sortBreed(initialBreeds);
-console.log(initialBreeds);

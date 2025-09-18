@@ -1,29 +1,29 @@
 "use strict";
 
 const containerPetsInfo = document.querySelector("#tbody");
+const btnFind = document.querySelector("#find-btn");
 
 const inputId = document.querySelector("#input-id");
 const inputName = document.querySelector("#input-name");
-// const inputType = document.querySelector("#input-type");
-// const inputBreed = document.querySelector("#input-breed");
+const inputType = document.querySelector("#input-type");
+const inputBreed = document.querySelector("#input-breed");
 const inputVaccinated = document.querySelector("#input-vaccinated");
 const inputDewormed = document.querySelector("#input-dewormed");
 const inputSterilized = document.querySelector("#input-sterilized");
-0;
 
 // Show breeds based on selected type
-inputType.addEventListener("change", (e) => {
+function renderBreed(type) {
   inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
 
-  const breeds = Array.from(getFromStorage("breed")).filter((el) => el.type == inputType.value);
+  const breeds = [...getFromStorage(BREED_KEY)].filter((el) => el.type == type);
 
-  breeds.forEach((el) => {
+  breeds?.forEach((el) => {
     inputBreed.innerHTML += `<option>${el.breed}</option>`;
   });
-});
+}
 
-// Event handler for find btn
-document.querySelector("#find-btn").addEventListener("click", (e) => {
+// Event handler for FIND btn
+btnFind.addEventListener("click", (e) => {
   const id = inputId.value;
   const name = inputName.value;
   const type = inputType.value;
@@ -32,7 +32,15 @@ document.querySelector("#find-btn").addEventListener("click", (e) => {
   const dewormed = inputDewormed.checked;
   const sterilized = inputSterilized.checked;
 
-  const filteredPets = Array.from(initialPets.values()).filter(
+  /*  "Lưu ý: Bạn sẽ cần tìm thú cưng đáp ứng đầy đủ các tiêu chí trên chứ không phải một trong các tiêu chí đó." from "https://courses.funix.edu.vn/courses/course-v1:FUNiX+PRF192x.2.2.VN+0923.CCDN/courseware/57b96b8a9fd8427ba8a6822620aa18a9/289b9cd944ba420bbf0e3b2b0b2e4269/"
+      - Tiêu chí gì??? nếu yêu cầu là `đáp ứng đầy đủ các fields/trường trên` thì dòng liền kề bên dưới sẽ được un-comment
+      - Theo như element này: 
+      <p><span style="font-family: arial, helvetica, sans-serif;"><img src="https://firebasestorage.googleapis.com/v0/b/funix-way.appspot.com/o/xSeries%2FPRF192x%2FASM_Image%2FPRF192x_ASM2_H%C6%B0%E1%BB%9Bng%20d%E1%BA%ABn%20d%E1%BB%B1%20%C3%A1n_H%C3%ACnh%2010.png?alt=media&amp;token=5c361f32-dbd7-420f-87a7-807823cc4449" type="saveimage" target="[object Object]" width="1265" height="300"></span></p>
+      thì không cần phải un-comment dòng liền kề
+  */
+  // if (!id || !name || type == "Select Type" || breed == "Select Breed") return;
+
+  const filteredPets = [...initialPets.values()].filter(
     (pet) =>
       (id ? pet.id?.toLowerCase().includes(id.toLowerCase()) : true) &&
       (name ? pet.name?.toLowerCase().includes(name.toLowerCase()) : true) &&
@@ -46,36 +54,49 @@ document.querySelector("#find-btn").addEventListener("click", (e) => {
   displayPetInfo(filteredPets);
 });
 
+// Form submit event handler
+document.querySelector("form").addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+
+    btnFind.click();
+  }
+});
+
 // display pet's info list
-function displayPetInfo(list) {
+function displayPetInfo(pets) {
+  // Clear container
   containerPetsInfo.innerHTML = "";
 
-  list.forEach((pet) => {
-    const name = pet.name ? pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "" : "Unnamed";
-    const dateAdded = new Date(pet.dateAdded).toLocaleDateString("en-US");
+  [...pets].forEach((pet) => {
+    const { id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded } = pet;
+    const petName = name[0].toUpperCase() + name.slice(1).toLowerCase() + "";
+
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(dateAdded));
 
     const html = `
 		<tr>
-			<th scope="row">${pet.id}</th>
-			<td id="pet-name">${name}</td>
-			<td id="pet-age">${pet.age}</td>
-			<td id="pet-type">${pet.type}</td>
-			<td id="pet-weight">${pet.weight ? pet.weight + "kg" : undefined}</td>
-			<td id="pet-length">${pet.length ? pet.length + "cm" : undefined}</td>
-			<td id="pet-breed">${pet.breed}</td>
-			<td id="pet-color">
-			  <i class="bi bi-square-fill" style="color: ${pet.color}"></i>
-			</td>
-			<td id="pet-vaccinated"><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
-			<td id="pet-dewormed"><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
-			<td id="pet-sterilized"><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>			
-			<td id="pet-date">${dateAdded}</td>
+			<th scope="row">${id}</th>
+			<td>${petName}</td>
+			<td>${age}</td>
+			<td>${type}</td>
+			<td>${weight} kg</td>
+			<td>${length} cm</td>
+			<td>${breed}</td>
 			<td>
-        <button type="button" class="btn btn-warning">Edit</button>
+			  <i class="bi bi-square-fill" style="color: ${color}"></i>
 			</td>
+			<td><i class="bi bi-${vaccinated ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${dewormed ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${sterilized ? "check" : "x"}-circle-fill"></i></td>
+			<td>${formattedDate}</td>
 		</tr>  
   `;
 
-    containerPetsInfo.innerHTML += html;
+    containerPetsInfo.insertAdjacentHTML("beforeend", html);
   });
 }

@@ -2,148 +2,220 @@
 
 const form = document.querySelector("#container-form");
 const containerPetsEdit = document.querySelector("#tbody");
-
 const btnSubmit = document.querySelector("#submit-btn");
 
 const inputId = document.querySelector("#input-id");
 const inputName = document.querySelector("#input-name");
 const inputAge = document.querySelector("#input-age");
-// const inputType = document.querySelector("#input-type");
+const inputType = document.querySelector("#input-type");
 const inputWeight = document.querySelector("#input-weight");
 const inputLength = document.querySelector("#input-length");
-// const inputBreed = document.querySelector("#input-breed");
+const inputBreed = document.querySelector("#input-breed");
 const inputColor = document.querySelector("#input-color-1");
 const inputVaccinated = document.querySelector("#input-vaccinated");
 const inputDewormed = document.querySelector("#input-dewormed");
 const inputSterilized = document.querySelector("#input-sterilized");
 
-// 1. Render data from localStorage
-const petArr = initialPets ?? new Map();
-displayPetInfo(petArr);
+// Render data from localStorage
+const petArr = [...initialPets];
+renderTableData(petArr);
 
-// 2. Display pet's info list
-function displayPetInfo(list) {
+// Display pet's info list
+function renderTableData(pets) {
+  // Clear container
   containerPetsEdit.innerHTML = "";
 
-  list.forEach((pet) => {
-    const name = pet.name ? pet.name[0].toUpperCase() + pet.name.slice(1).toLowerCase() + "" : "Unnamed";
-    const dateAdded = new Date(pet.dateAdded).toLocaleDateString("en-US");
+  [...pets].forEach((pet) => {
+    const { id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized, dateAdded } = pet;
+    const petName = name[0].toUpperCase() + name.slice(1).toLowerCase() + "";
+
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(dateAdded));
 
     const html = `
 		<tr>
-			<th scope="row">${pet.id}</th>
-			<td id="pet-name">${name}</td>
-			<td id="pet-age">${pet.age}</td>
-			<td id="pet-type">${pet.type}</td>
-			<td id="pet-weight">${pet.weight ? pet.weight + "kg" : undefined}</td>
-			<td id="pet-length">${pet.length ? pet.length + "cm" : undefined}</td>
-			<td id="pet-breed">${pet.breed}</td>
-			<td id="pet-color">
-			  <i class="bi bi-square-fill" style="color: ${pet.color}"></i>
+			<th scope="row">${id}</th>
+			<td>${petName}</td>
+			<td>${age}</td>
+			<td>${type}</td>
+			<td>${weight} kg</td>
+			<td>${length} cm</td>
+			<td>${breed}</td>
+			<td>
+			  <i class="bi bi-square-fill" style="color: ${color}"></i>
 			</td>
-			<td id="pet-vaccinated"><i class="bi bi-${pet.vaccinated ? "check" : "x"}-circle-fill"></i></td>
-			<td id="pet-dewormed"><i class="bi bi-${pet.dewormed ? "check" : "x"}-circle-fill"></i></td>
-			<td id="pet-sterilized"><i class="bi bi-${pet.sterilized ? "check" : "x"}-circle-fill"></i></td>			
-			<td id="pet-date">${dateAdded}</td>
+			<td><i class="bi bi-${vaccinated ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${dewormed ? "check" : "x"}-circle-fill"></i></td>
+			<td><i class="bi bi-${sterilized ? "check" : "x"}-circle-fill"></i></td>
+			<td>${formattedDate}</td>
 			<td>
         <button type="button" class="btn btn-warning">Edit</button>
 			</td>
 		</tr>  
   `;
 
-    containerPetsEdit.innerHTML += html;
+    containerPetsEdit.insertAdjacentHTML("beforeend", html);
   });
 }
 
-// 3. Event handler for EDIT btn
+// Event handler for EDIT btn
 containerPetsEdit.addEventListener("click", (e) => {
   e.preventDefault();
 
-  if (e.target && e.target.closest(".btn-warning")) {
+  if (e.target && e.target.matches("button")) {
     const row = e.target.closest("tr");
-    const id = row.querySelector("th").textContent;
-    const name = row.querySelector("#pet-name").textContent;
-    const age = row.querySelector("#pet-age").textContent;
-    const type = row.querySelector("#pet-type").textContent;
-    const weight = row.querySelector("#pet-weight").textContent;
-    const length = row.querySelector("#pet-length").textContent;
-    const breed = row.querySelector("#pet-breed").textContent;
-    const color = window.getComputedStyle(row.querySelector("#pet-color").querySelector("i")).color;
-    const vaccinated = row.querySelector("#pet-vaccinated");
-    const dewormed = row.querySelector("#pet-dewormed");
-    const sterilized = row.querySelector("#pet-sterilized");
+    const petId = row.querySelector("th").textContent;
+
+    const [{ id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized }] = findPet(petId);
 
     inputId.value = id;
     inputName.value = name;
     inputAge.value = age;
     inputType.value = type;
-    inputWeight.value = retrieveNumbers(weight);
-    inputLength.value = retrieveNumbers(length);
+    inputWeight.value = weight;
+    inputLength.value = length;
     // inputBreed.value = breed;
-    inputColor.value = rgbToHex(color);
-    inputVaccinated.checked = isChecked(vaccinated);
-    inputDewormed.checked = isChecked(dewormed);
-    inputSterilized.checked = isChecked(sterilized);
+    inputColor.value = color;
+    inputVaccinated.checked = vaccinated;
+    inputDewormed.checked = dewormed;
+    inputSterilized.checked = sterilized;
 
     renderBreed(inputType.value);
-
     inputBreed.value = breed;
 
     form.classList.remove("hide");
   }
 });
 
-// Convert String input to number
-function retrieveNumbers(input) {
-  return +input.match(/\d+/g);
+// Find pet function
+function findPet(id) {
+  const existedPet = petArr.find((pet) => pet.id == id);
+  const index = petArr.findIndex((pet) => pet.id == id);
+  return [existedPet, index];
 }
 
-// Convert rgb to hex color
-function rgbToHex(rgb) {
-  const rgbArray = rgb.match(/\d+/g);
-  const hex = rgbArray
-    .map((x) => {
-      const hexValue = parseInt(x).toString(16);
-      return hexValue.length === 1 ? "0" + hexValue : hexValue;
-    })
-    .join("");
-  return `#${hex}`;
-}
+// Render breed list based on selected type
+function renderBreed(type) {
+  inputBreed.innerHTML = `<option disabled selected hidden>Select Breed</option>`;
 
-// Checking true/flase fields
-function isChecked(input) {
-  return input.querySelector("i").classList.contains("bi-check-circle-fill");
+  const breeds = [...getFromStorage(BREED_KEY)].filter((el) => el.type == type);
+
+  breeds?.forEach((el) => {
+    inputBreed.innerHTML += `<option>${el.breed}</option>`;
+  });
 }
 
 // Event handler for SUBMIT form for pet info changing
 btnSubmit.addEventListener("click", (e) => {
   e.preventDefault();
 
-  // retrieve data
   const id = inputId.value;
+
+  const [, i] = findPet(id);
+
   const name = inputName.value;
   const age = inputAge.value;
   const type = inputType.value;
   const weight = inputWeight.value;
-  const lenght = inputLength.value;
+  const length = inputLength.value;
   const breed = inputBreed.value;
   const color = inputColor.value;
   const vaccinated = inputVaccinated.checked;
   const dewormed = inputDewormed.checked;
   const sterilized = inputSterilized.checked;
 
-  const newPet = new PetData(id.toUpperCase(), name, age, type, weight, lenght, breed, color, vaccinated, dewormed, sterilized);
+  const newPet = new PetData(id, name, age, type, weight, length, breed, color, vaccinated, dewormed, sterilized);
+
+  if (!validate(newPet)) return;
 
   // updateData
-  initialPets.set(newPet.id, newPet);
+  petArr.splice(i, 1, newPet);
 
   // display pets
-  displayPetInfo(initialPets);
+  renderTableData(petArr);
 
   // update localStorage
-  saveToStorage("pet", initialPets);
+  saveToStorage(PET_KEY, petArr);
 
+  // Clear input fields
   document.querySelector("form").reset();
 
+  // Hide form
   form.classList.add("hide");
+
+  // annoucement
+  showToast("Data is updated!", "success");
 });
+
+// Form submit event handler
+form.addEventListener("keydown", (e) => {
+  if (e.key == "Enter") {
+    e.preventDefault();
+
+    btnSubmit.click();
+  }
+});
+
+// Validate function
+function validate(pet) {
+  const namePattern = /^\p{L}+(?:[\s'\-]\p{L}+)*$/u;
+  const numberPattern = /^\d+$/;
+
+  const { name, age, type, weight, length, breed } = pet;
+
+  // Type-safe
+  if (!pet instanceof PetData) return false;
+
+  // Non-fields empty
+  if (!name || !age || !weight || !length) {
+    warning("Inputs cannot be empty");
+    return false;
+  }
+
+  // Name
+  if (!namePattern.test(name)) {
+    warning("Name cannot be included number!", inputName);
+    return false;
+  }
+
+  // Age
+  if (!numberPattern.test(age) || age < 1 || age > 15) {
+    warning("Age must be between 1 and 15!", inputAge);
+    return false;
+  }
+
+  // Type
+  if (type == "Select Type") {
+    warning("Please select Type!", inputType);
+    return false;
+  }
+
+  // Weight
+  if (!numberPattern.test(weight) || weight < 1 || weight > 15) {
+    warning("Weight must be between 1 and 15!", inputWeight);
+    return false;
+  }
+
+  // Length
+  if (!numberPattern.test(length) || length < 1 || length > 100) {
+    warning("Length must be between 1 and 100!", inputLength);
+    return false;
+  }
+
+  // Breed
+  if (breed == "Select Breed") {
+    warning("Please select Breed!", inputBreed);
+    return false;
+  }
+
+  return true;
+}
+
+// Annoucement
+function warning(message, selector) {
+  selector?.focus();
+  showToast(message);
+}
