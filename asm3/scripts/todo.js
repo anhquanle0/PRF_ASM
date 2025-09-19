@@ -42,7 +42,7 @@ btnAdd.addEventListener("click", (e) => {
   e.preventDefault();
 
   // Retrieve data from inputs fieldd
-  const task = inputTask.value;
+  const task = inputTask.value.trim();
   if (!task) {
     alert("Enter your task name");
     return;
